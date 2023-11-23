@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:irun/navi/navi.dart';
 import 'package:location/location.dart';
 import 'package:irun/map/route.dart';
 
@@ -13,24 +14,73 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController? _controller;
   LocationData? _currentLocation;
+  bool showProperty1Home = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation().then((locationData) {
+      setState(() {
+        _currentLocation = locationData;
+      });
+      _moveToCurrentLocation();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Running Route Tracker'),
+        title: Text('IRUN'), // 앱 바에 제목 추가
       ),
-      body: Column(
-        children: [
-          Container(
+        body: Center(
+            child: GestureDetector(
+              onTap: () { // Start 버튼을 눌렀을 때 할 작업 추가
+                print('Start 버튼을 눌렀습니다!');
+              },
+            child: Container(
+              width: 150.0,
+              height: 150.0,
+              decoration: BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
+              ),
+            child: Center(
+              child: RaisedButton(
+                onPressed: () { // Start 버튼을 눌렀을 때 할 작업 추가
+                  print('Start 버튼을 눌렀습니다!');
+                },
+                child: Text(
+                  'Start',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.0,
+                  ),
+                ),
+              ),
+            ),
+            ),
+            ),
+        ),
+      bottomNavigationBar: MenuBottom(currentIndex: 1),
+    );
+  }
+
+  Widget buildMapScreen() {
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
             decoration: BoxDecoration(
               border: Border.all(
                 width: 1,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withOpacity(0.2),
               ),
             ),
-            height: 170,
-            width: double.infinity,
             alignment: Alignment.center,
             child: _currentLocation == null
                 ? Text(
@@ -39,7 +89,10 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context)
                   .textTheme
                   .bodyText2!
-                  .copyWith(color: Theme.of(context).colorScheme.onBackground),
+                  .copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onBackground),
             )
                 : GoogleMap(
               onMapCreated: (controller) {
@@ -66,42 +119,29 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          Container(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    LocationData locationData = await _getCurrentLocation();
-                    setState(() {
-                      _currentLocation = locationData;
-                    });
-                    _moveToCurrentLocation();
-                  },
-                  icon: const Icon(Icons.location_on),
-                  label: const Text('Get Current Location'),
-                ),
-                ElevatedButton.icon(
+        ),
+        Container(
+          padding: EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(width: 16.0),
+              Expanded(
+                child: ElevatedButton.icon(
                   onPressed: () {
-                    // Navigate to the map screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapScreen(),
-                      ),
-                    );
+                    Navigator.pushNamedAndRemoveUntil(context, '/r', (route) => false);
                   },
                   icon: const Icon(Icons.map),
                   label: const Text('Start Recording'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+
 
   Future<LocationData> _getCurrentLocation() async {
     var location = Location();

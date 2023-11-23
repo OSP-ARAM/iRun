@@ -3,117 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  GoogleMapController? _controller;
-  LocationData? _currentLocation;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Running Route Tracker'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  width: 1,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: GoogleMap(
-                onMapCreated: (controller) {
-                  setState(() {
-                    _controller = controller;
-                  });
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                    _currentLocation?.latitude ?? 0.0,
-                    _currentLocation?.longitude ?? 0.0,
-                  ),
-                  zoom: 20,
-                ),
-                markers: _currentLocation != null
-                    ? {
-                  Marker(
-                    markerId: MarkerId('currentLocation'),
-                    position: LatLng(
-                      _currentLocation!.latitude!,
-                      _currentLocation!.longitude!,
-                    ),
-                    infoWindow: InfoWindow(title: 'Current Location'),
-                  ),
-                }
-                    : {},
-              ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    LocationData locationData = await _getCurrentLocation();
-                    setState(() {
-                      _currentLocation = locationData;
-                    });
-                    _moveToCurrentLocation();
-                  },
-                  icon: const Icon(Icons.location_on),
-                  label: const Text('Get Current Location'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapScreen(currentLocation: _currentLocation),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.map),
-                  label: const Text('Start Recording'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<LocationData> _getCurrentLocation() async {
-    var location = Location();
-    return await location.getLocation();
-  }
-
-  void _moveToCurrentLocation() {
-    if (_controller != null && _currentLocation != null) {
-      _controller!.animateCamera(
-        CameraUpdate.newLatLng(
-          LatLng(
-            _currentLocation!.latitude!,
-            _currentLocation!.longitude!,
-          ),
-        ),
-      );
-    }
-  }
-}
-
 class MapScreen extends StatefulWidget {
   final LocationData? currentLocation;
 
@@ -203,7 +92,10 @@ class _MapScreenState extends State<MapScreen> {
                 SizedBox(height: 8.0),
                 _isRecording
                     ? ElevatedButton(
-                  onPressed: _stopRecording,
+                  onPressed: () {
+                    _stopRecording();
+                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                  },
                   child: Text('Stop Recording'),
                 )
                     : Text('Recording Stopped'),
