@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:irun/Achievements/Achievements_page.dart';
+import 'package:irun/home/home_page.dart';
+import 'package:irun/log/log_page.dart';
+import 'package:irun/option/option_page.dart';
 import 'firebase_options.dart';
+import 'package:irun/record/record_page.dart';
 
 import 'login/login_page.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -13,7 +18,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +28,18 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginPage(),
-    );
-  }
-}
+      //home: LoginPage(),
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('iRun'),
-      ),
-      body: const Text('iRun'),
+      routes: {
+        '/' : (context) => LoginPage(),
+        '/home' : (context) => MyHomePage(),
+        // '/mission' : (context) => MissionPage(),
+        '/option' : (context) => OptionPage(),
+        '/record' : (context) => MapScreen(),
+        '/log' : (context) => LogPage(),
+        '/Achievements' : (context) => AchievementsPage()
+      },
+      initialRoute: '/',
     );
   }
 }

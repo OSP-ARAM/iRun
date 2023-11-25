@@ -21,10 +21,7 @@ class LoginPage extends StatelessWidget {
               onPressed: () {
                 signInWithGoogle().then((user){
                   if (user!=null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyHomePage()),
-                    );
+                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                   }
                 }).catchError((e) {
                   print("an error occurred");
