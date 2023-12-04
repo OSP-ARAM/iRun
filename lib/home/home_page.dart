@@ -3,6 +3,9 @@ import 'package:irun/navi/navi.dart';
 import 'package:irun/mission/button.dart';
 import 'package:lottie/lottie.dart';
 
+import 'weather_model.dart';
+import 'weather_service.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -12,12 +15,63 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool showProperty1Home = false;
+  final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
+  Weather? _weather;
+
+  _fetchWeather() async {
+    String cityName = await _weatherService.getCurrentCity();
+
+    try {
+      final weather = await _weatherService.getWeather(cityName);
+      setState(() {
+        _weather = weather;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  String getWeatherAnimation(String? mainCondition) {
+    if (mainCondition == null) return 'images/sunny.json';
+
+    switch (mainCondition.toLowerCase()) {
+      case 'clouds':
+      case 'mist':
+      case 'smoke':
+      case 'haze':
+      case 'dust':
+      case 'fog':
+        return 'images/cloud.json';
+      case 'rain':
+        return 'images/rain.json';
+      case 'thunderstorm':
+        return 'images/thunder.json';
+      case 'clear':
+        return 'images/sunny.json';
+      default:
+        return 'images/sunny.json';
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fetchWeather();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('iRun'),
+        title: Text(
+          'iRun',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 25.0,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -28,17 +82,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50),
+          preferredSize: Size.fromHeight(130),
           child: Padding(
-            padding: EdgeInsets.only(left: 30.0),
-            child: Row(
+            padding: EdgeInsets.only(right: 300.0),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 30.0,
-                  height: 30.0,
-                  child: CustomIconButton(),
+                Text(_weather?.cityName ?? "loading city..."),
+                Lottie.asset(
+                  getWeatherAnimation(_weather?.mainCondition),
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.fill,
                 ),
+                Text(
+                  "${_weather?.temperature.round()}℃",
+                ),
+                Text(_weather?.mainCondition ?? "")
               ],
             ),
           ),
@@ -48,9 +108,17 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            Positioned(
+              child: Lottie.asset(
+                'images/fire.json',
+                width: 310,
+                height: 310,
+                fit: BoxFit.fill,
+              ),
+            ),
             // Start 버튼
             Transform.translate(
-              offset: Offset(3, 0),
+              offset: Offset(5, -1),
               child: InkWell(
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
@@ -79,14 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            Positioned(
-              child: Lottie.asset(
-                'images/fire.json',
-                width: 300,
-                height: 300,
-                fit: BoxFit.fill,
-              ),
-            ),
+
             // 작은 원 1
             Positioned(
               bottom: 30,
@@ -99,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             // 작은 원 2
             Positioned(
-              left:127,
+              left: 133,
               bottom: 0,
               child: SizedBox(
                 width: 50.0,
