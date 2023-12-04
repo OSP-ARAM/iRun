@@ -4,6 +4,7 @@ import 'package:irun/Achievements/Achievements_page.dart';
 import 'package:irun/home/home_page.dart';
 import 'package:irun/log/log_page.dart';
 import 'package:irun/option/option_page.dart';
+import 'package:irun/ranking/ranking_page.dart';
 import 'firebase_options.dart';
 import 'package:irun/record/record_page.dart';
 
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/' : (context) => LoginPage(),
         '/home' : (context) => MyHomePage(),
         // '/mission' : (context) => MissionPage(),
+        '/ranking' : (context) => RankingPage(),
         '/option' : (context) => OptionPage(),
         '/record' : (context) => MapScreen(),
         '/log' : (context) => LogPage(),

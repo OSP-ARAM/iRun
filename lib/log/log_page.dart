@@ -6,25 +6,22 @@ import 'package:intl/intl.dart';
 class LogPage extends StatelessWidget {
   const LogPage({Key? key}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('기록 페이지'),
+        title: Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              '당신의 러닝 기록',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
             SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('running_records').snapshots(),
+                stream: FirebaseFirestore.instance.collection('running_records').orderBy('timestamp', descending: true).snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return Center(
