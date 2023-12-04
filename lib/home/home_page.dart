@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irun/navi/navi.dart';
 import 'package:irun/mission/button.dart';
+import 'package:lottie/lottie.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('IRUN'),
+        title: Text('iRun'),
         actions: [
           IconButton(
             onPressed: () {
@@ -26,57 +27,80 @@ class _MyHomePageState extends State<MyHomePage> {
             iconSize: 40,
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50),
+          child: Padding(
+            padding: EdgeInsets.only(left: 30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 30.0,
+                  height: 30.0,
+                  child: CustomIconButton(),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 큰 원
+            // Start 버튼
             Transform.translate(
-              offset: Offset(0, -80),
+              offset: Offset(3, 0),
               child: InkWell(
                 onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(context, '/record', (route) => false);
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/record', (route) => false);
                 },
                 highlightColor: Colors.grey,
                 splashColor: Colors.grey,
                 borderRadius: BorderRadius.circular(150.0),
                 child: Container(
                   width: 300.0,
-                  height: 300.0,
+                  height: 150.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.yellow,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 3.0,
-                    ),
                   ),
                   child: Center(
                     child: Text(
-                      'Start',
+                      '시작',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 35.0,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
+            Positioned(
+              child: Lottie.asset(
+                'images/fire.json',
+                width: 300,
+                height: 300,
+                fit: BoxFit.fill,
+              ),
+            ),
             // 작은 원 1
             Positioned(
-              bottom: 40,
-              left: 45,
+              bottom: 30,
+              left: 203,
               child: SizedBox(
                 width: 50.0,
                 height: 50.0,
-                child : CustomIconButton(),
+                child: CustomIconButton(),
               ),
             ),
             // 작은 원 2
             Positioned(
-              bottom: 20,
+              left:127,
+              bottom: 0,
               child: SizedBox(
                 width: 50.0,
                 height: 50.0,
@@ -85,12 +109,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             // 작은 원 3
             Positioned(
-              bottom: 40,
-              right: 45,
+              bottom: 30,
+              right: 197,
               child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CustomIconButton(),
+                width: 50.0,
+                height: 50.0,
+                child: CustomIconButton(),
               ),
             ),
           ],

@@ -27,14 +27,24 @@ class _CustomIconButtonState extends State<CustomIconButton> {
       child: Container(
         width: 50.0,
         height: 50.0,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          shape: BoxShape.circle,
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+              spreadRadius: 0,
+            )
+          ],
         ),
         child: Center(
           child: Icon(
             selectedIcon,
-            color: Colors.white,
+            color: Colors.black,
             size: 30.0,
           ),
         ),
