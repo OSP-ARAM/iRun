@@ -19,7 +19,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Weather? _weather;
 
   _fetchWeather() async {
-    String cityName = await _weatherService.getCurrentCity();
+    // String cityName = await _weatherService.getCurrentCity();
+    String cityName = "Gumi";
 
     try {
       final weather = await _weatherService.getWeather(cityName);
