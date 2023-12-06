@@ -82,10 +82,27 @@ class _MyHomePageState extends State<MyHomePage> {
             iconSize: 40,
           ),
         ],
+<<<<<<< Updated upstream
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(130),
           child: Padding(
             padding: EdgeInsets.only(right: 300.0),
+=======
+      ),
+      body: Stack(
+        children: [
+          // GoogleMap 위젯 추가
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: currentLocation ?? LatLng(37.5665, 126.9780), // 서울의 좌표를 기본값으로 설정
+              zoom: 19.0,
+            ),
+          ),
+          // 기존의 UI 요소들
+          Padding(
+            padding: EdgeInsets.only(right: 200.0),
+>>>>>>> Stashed changes
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -103,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
+<<<<<<< Updated upstream
         ),
       ),
       body: Center(
@@ -143,6 +161,43 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontWeight: FontWeight.bold,
                         fontSize: 35.0,
                       ),
+=======
+          Positioned(
+            bottom: 114,
+            left: 40,
+            child: Lottie.asset(
+              'images/fire.json',
+              width: 310,
+              height: 310,
+              fit: BoxFit.fill,
+            ),
+          ),
+          // Start 버튼
+          Transform.translate(
+            offset: Offset(51, 224),
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/record', (route) => false);
+              },
+              highlightColor: Colors.grey,
+              splashColor: Colors.grey,
+              borderRadius: BorderRadius.circular(150.0),
+              child: Container(
+                width: 300.0,
+                height: 150.0,
+                decoration: BoxDecoration(
+                  color: Colors.yellow,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '시작',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 35.0,
+>>>>>>> Stashed changes
                     ),
                   ),
                 ),
@@ -159,6 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: CustomIconButton(),
               ),
             ),
+<<<<<<< Updated upstream
             // 작은 원 2
             Positioned(
               left: 133,
@@ -168,6 +224,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 50.0,
                 child: CustomIconButton(),
               ),
+=======
+          ),
+          // 작은 원 2
+          Positioned(
+            left: 175,
+            bottom: 130,
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: CustomIconButton(),
+>>>>>>> Stashed changes
             ),
             // 작은 원 3
             Positioned(
