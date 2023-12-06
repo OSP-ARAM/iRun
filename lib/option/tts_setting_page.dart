@@ -1,71 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TTSSetting extends StatefulWidget {
-  const TTSSetting({Key? key}) : super(key: key);
+  final FlutterTts tts = FlutterTts();
 
-  static Future<void> loadSettings() async {
-    _TTSSettingState instance = _TTSSettingState();
-    await instance._loadSettings();
+  FlutterTts getTts() {
+    return tts;
   }
 
-  static String getLanguage() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.language;
-  }
-
-  static Map<String, String> getVoice() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.voice;
-  }
-
-  static String getEngine() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.engine;
-  }
-
-  static double getVolume() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.volume;
-  }
-
-  static double getPitch() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.pitch;
-  }
-
-  static double getRate() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.rate;
-  }
-
-  static bool getIsSetted() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.isSetted;
-  }
-
-  static bool getIsWoman() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.isWoman;
-  }
-
-  static bool getIsMan() {
-    _TTSSettingState instance = _TTSSettingState();
-    return instance.isMan;
-  }
+  TTSSetting({super.key});
 
   @override
   State<TTSSetting> createState() => _TTSSettingState();
 }
 
 class _TTSSettingState extends State<TTSSetting> {
-  final FlutterTts tts = FlutterTts();
+  FlutterTts tts = FlutterTts();
 
   String language = "ko-KR";
   Map<String, String> voice = {"name": "ko-kr-x-ism-local", "locale": "ko-KR"};
   String engine = "com.google.android.tts";
-  double volume = 1.2;
+  double volume = 0.8;
   double pitch = 1.0;
   double rate = 0.5;
 
@@ -76,38 +31,21 @@ class _TTSSettingState extends State<TTSSetting> {
 
   final TextEditingController controller = TextEditingController();
 
-  Future<void> _saveSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isSetted', isSetted);
-    // 다른 설정도 유사한 방식으로 저장합니다...
-  }
-
-  Future<void> _loadSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isSetted = prefs.getBool('isSetted') ?? false;
-      // 다른 설정도 유사한 방식으로 불러옵니다...
-    });
-  }
-
   @override
   void initState() {
     super.initState();
 
+    // TTS 초기 설정
     initTts();
 
+    // 여성, 남성 결정
     isSelected = [isWoman, isMan];
-
-    _loadSettings();
   }
 
-  @override
-  void dispose() {
-    _saveSettings();
-    super.dispose();
-  }
-
+  // TTS 초기 설정
   initTts() async {
+    //await initTtsIosOnly(); // iOS 설정
+
     tts.setLanguage(language);
     tts.setVoice(voice);
     tts.setEngine(engine);
@@ -116,10 +54,28 @@ class _TTSSettingState extends State<TTSSetting> {
     tts.setSpeechRate(rate);
   }
 
+  // // TTS iOS 옵션
+  // Future<void> initTtsIosOnly() async {
+  //   // iOS 전용 옵션 : 공유 오디오 인스턴스 설정
+  //   await tts.setSharedInstance(true);
+
+  //   // 배경 음악와 인앱 오디오 세션을 동시에 사용
+  //   await tts.setIosAudioCategory(
+  //       IosTextToSpeechAudioCategory.ambient,
+  //       [
+  //         IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+  //         IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+  //         IosTextToSpeechAudioCategoryOptions.mixWithOthers
+  //       ],
+  //       IosTextToSpeechAudioMode.voicePrompt);
+  // }
+
+  // TTS로 읽어주기
   Future _speak(voiceText) async {
     tts.speak(voiceText);
   }
 
+  //여성, 남성 토글 선택
   void toggleSelect(value) {
     if (value == 0) {
       isWoman = true;
@@ -134,12 +90,7 @@ class _TTSSettingState extends State<TTSSetting> {
       isSelected = [isWoman, isMan];
       tts.setVoice(voice);
     });
-
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _saveSettings();
-    });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -190,11 +141,10 @@ class _TTSSettingState extends State<TTSSetting> {
             ],
           ),
           ElevatedButton(
-            onPressed: () {
-              isSetted ? _speak('10km 1시간 페이스 30') : print(' ');
-            },
-            child: const Text('내용 읽기'),
-          ),
+              onPressed: () {
+                isSetted ? _speak('10km 1시간 페이스 30') : print(' ');
+              },
+              child: const Text('내용 읽기')),
         ],
       ),
     );

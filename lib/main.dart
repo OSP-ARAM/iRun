@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:irun/Achievements/Achievements_page.dart';
+import 'package:irun/Achievements/achievements_page.dart';
 import 'package:irun/home/home_page.dart';
 import 'package:irun/log/log_page.dart';
 import 'package:irun/option/option_page.dart';
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/record' : (context) => MapScreen(),
         '/log' : (context) => LogPage(),
         '/Achievements' : (context) => AchievementsPage()
+        //'/Achievements' : (context) => AwardTest()
       },
       initialRoute: '/',
     );
