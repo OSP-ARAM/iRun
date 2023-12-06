@@ -99,9 +99,18 @@ class _MyHomePageState extends State<MyHomePage> {
             iconSize: 40,
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(100),
-          child: Padding(
+      ),
+      body: Stack(
+        children: [
+          // GoogleMap 위젯 추가
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: currentLocation ?? LatLng(37.5665, 126.9780), // 서울의 좌표를 기본값으로 설정
+              zoom: 19.0,
+            ),
+          ),
+          Padding(
             padding: EdgeInsets.only(right: 300.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -120,18 +129,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          // GoogleMap 위젯 추가
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: currentLocation ?? LatLng(37.5665, 126.9780), // 서울의 좌표를 기본값으로 설정
-              zoom: 19.0,
-            ),
-          ),
           // 기존의 UI 요소들
           Positioned(
             bottom: 114,
@@ -145,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           // Start 버튼
           Transform.translate(
-            offset: Offset(50, 200),
+            offset: Offset(50, 224),
             child: InkWell(
               onTap: () {
                 Navigator.pushNamedAndRemoveUntil(
@@ -186,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           // 작은 원 2
           Positioned(
-            left: 170,
+            left: 175,
             bottom: 130,
             child: SizedBox(
               width: 50.0,
