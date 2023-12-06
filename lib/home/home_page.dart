@@ -20,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showProperty1Home = false;
   final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
   Weather? _weather;
+  Position? _position;
 
   GoogleMapController? mapController;
   LatLng? currentLocation;
@@ -68,8 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _getCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
+      _position = position;
       currentLocation = LatLng(position.latitude, position.longitude);
     });
   }
@@ -80,130 +83,263 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'iRun',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 25.0,
+    return DefaultTabController(
+      length: 4, // 탭바의 수 설정
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'iRun',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 25.0,
+            ),
+          ),
+          bottom: TabBar(
+            tabs: [
+              Tab(text: '메인'), // 탭바의 각 항목 설정
+              Tab(text: '기록'),
+              Tab(text: '랭킹'),
+              Tab(text: '업적'),
+            ],
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/option');
-            },
-            icon: Icon(Icons.settings),
-            iconSize: 40,
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // GoogleMap 위젯 추가
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: currentLocation ?? LatLng(37.5665, 126.9780), // 서울의 좌표를 기본값으로 설정
-              zoom: 19.0,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 300.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+        body: TabBarView(
+          children: [
+            // 각 탭에 대한 내용 설정
+            Stack(
               children: [
-                Text(_weather?.cityName ?? "loading city..."),
-                Lottie.asset(
-                  getWeatherAnimation(_weather?.mainCondition),
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.fill,
+                // GoogleMap 및 기타 위젯들
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: currentLocation ?? LatLng(36.1433405, 128.393805),
+                    // 금오공대 좌표를 기본값으로 설정
+                    // 기본값 또는 원하는 다른 위치의 좌표로 설정
+                    zoom: 16.0,
+                  ),
                 ),
-                Text(
-                  "${_weather?.temperature.round()}℃",
-                ),
-                // Text(_weather?.mainCondition ?? "")
-              ],
-            ),
-          ),
-          // 기존의 UI 요소들
-          Positioned(
-            bottom: 114,
-            left: 40,
-            child: Lottie.asset(
-              'images/fire.json',
-              width: 310,
-              height: 310,
-              fit: BoxFit.fill,
-            ),
-          ),
-          // Start 버튼
-          Transform.translate(
-            offset: Offset(50, 224),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/record', (route) => false);
-              },
-              highlightColor: Colors.grey,
-              splashColor: Colors.grey,
-              borderRadius: BorderRadius.circular(150.0),
-              child: Container(
-                width: 300.0,
-                height: 150.0,
-                decoration: BoxDecoration(
-                  color: Colors.yellow,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '시작',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 35.0,
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 15,
+                    top: 15,
+                  ),
+                  child: ClipOval(
+                    child: Container(
+                      height: 80,
+                      width: 80,
+                      color: Colors.white,
+                      // 흰색 배경 설정
+                      padding: EdgeInsets.all(0),
+                      // 동그라미 내부 여백 설정
+                      child: Column(
+                        children: [
+                          Lottie.asset(
+                            getWeatherAnimation(_weather?.mainCondition),
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.fill,
+                          ),
+                          SizedBox(width: 10), // 아이콘과 온도 사이 여백 조절
+                          Text(
+                            "${_weather?.temperature.round()}℃",
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
+                // 기존의 UI 요소들
+                Positioned(
+                  bottom: 50,
+                  left: 80,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/record', (route) => false);
+                    },
+                    child: Lottie.asset(
+                      'images/start.json',
+                      width: 250.0,
+                      height: 250.0,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+
+                // 작은 원 1
+                Positioned(
+                  left: 100,
+                  bottom: 80,
+                  child: Container(
+                    width: 50.0,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/option');
+                      },
+                      icon: Icon(Icons.settings),
+                      iconSize: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                // 작은 원 2
+                Positioned(
+                  left: 180,
+                  bottom: 50,
+                  child: SizedBox(
+                    width: 50.0,
+                    height: 50.0,
+                    child: CustomIconButton(),
+                  ),
+                ),
+                // 작은 원 3
+                Positioned(
+                  left: 260,
+                  bottom: 80,
+                  child: SizedBox(
+                    width: 50.0,
+                    height: 50.0,
+                    child: CustomIconButton(),
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              // 두 번째 탭의 내용
+              child: Center(
+                child: Text('Tab 2 Content'),
               ),
             ),
-          ),
-          // 작은 원 1
-          Positioned(
-            bottom: 150,
-            left: 100,
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CustomIconButton(),
+            Container(
+              // 두 번째 탭의 내용
+              child: Center(
+                child: Text('Tab 3 Content'),
+              ),
             ),
-          ),
-          // 작은 원 2
-          Positioned(
-            left: 175,
-            bottom: 130,
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CustomIconButton(),
+            Container(
+              // 두 번째 탭의 내용
+              child: Center(
+                child: Text('Tab 4 Content'),
+              ),
             ),
-          ),
-          // 작은 원 3
-          Positioned(
-            bottom: 150,
-            right: 100,
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CustomIconButton(),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-      bottomNavigationBar: MenuBottom(currentIndex: 1),
     );
   }
 }
+// Scaffold(
+//       appBar: AppBar(
+//         title: Text(
+//           'iRun',
+//           style: TextStyle(
+//             color: Colors.black,
+//             fontWeight: FontWeight.bold,
+//             fontSize: 25.0,
+//           ),
+//         ),
+//       ),
+//       body: Stack(
+//         children: [
+//           // GoogleMap 위젯 추가
+//           GoogleMap(
+//             onMapCreated: _onMapCreated,
+//             initialCameraPosition: CameraPosition(
+//               target: currentLocation ?? LatLng(36.1433405, 128.393805),
+//               // 서울의 좌표를 기본값으로 설정
+//               // 기본값 또는 원하는 다른 위치의 좌표로 설정
+//               zoom: 16.0,
+//             ),
+//           ),
+//           Padding(
+//             padding: EdgeInsets.only(
+//               left: 30,
+//               top: 30,
+//             ),
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.start,
+//               children: [
+//                 // Text(_weather?.cityName ?? "loading city..."),
+//                 Lottie.asset(
+//                   getWeatherAnimation(_weather?.mainCondition),
+//                   width: 50,
+//                   height: 50,
+//                   fit: BoxFit.fill,
+//                 ),
+//                 Text(
+//                   "${_weather?.temperature.round()}℃",
+//                 ),
+//                 // Text(_weather?.mainCondition ?? "")
+//               ],
+//             ),
+//           ),
+//           // 기존의 UI 요소들
+//           Positioned(
+//             bottom: 50,
+//             left: 80,
+//             child: GestureDetector(
+//               onTap: () {
+//                 Navigator.pushNamedAndRemoveUntil(
+//                     context, '/record', (route) => false);
+//               },
+//               child: Lottie.asset(
+//                 'images/start.json',
+//                 width: 250.0,
+//                 height: 250.0,
+//                 fit: BoxFit.fill,
+//               ),
+//             ),
+//           ),
+//
+//           // 작은 원 1
+//           Positioned(
+//             left: 100,
+//             bottom: 80,
+//             child: Container(
+//               width: 50.0,
+//               height: 50.0,
+//               decoration: BoxDecoration(
+//                 color: Colors.grey,
+//                 shape: BoxShape.circle,
+//               ),
+//               child: IconButton(
+//                 onPressed: () {
+//                   Navigator.pushNamed(context, '/option');
+//                 },
+//                 icon: Icon(Icons.settings),
+//                 iconSize: 30,
+//                 color: Colors.white,
+//               ),
+//             ),
+//           ),
+//           // 작은 원 2
+//           Positioned(
+//             left: 180,
+//             bottom: 50,
+//             child: SizedBox(
+//               width: 50.0,
+//               height: 50.0,
+//               child: CustomIconButton(),
+//             ),
+//           ),
+//           // 작은 원 3
+//           Positioned(
+//             left: 260,
+//             bottom: 80,
+//             child: SizedBox(
+//               width: 50.0,
+//               height: 50.0,
+//               child: CustomIconButton(),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
