@@ -6,6 +6,9 @@ import 'package:lottie/lottie.dart';
 import 'weather_model.dart';
 import 'weather_service.dart';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -17,6 +20,9 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showProperty1Home = false;
   final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
   Weather? _weather;
+
+  GoogleMapController? mapController;
+  LatLng? currentLocation;
 
   _fetchWeather() async {
     // String cityName = await _weatherService.getCurrentCity();
@@ -57,8 +63,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
+    _getCurrentLocation();
     _fetchWeather();
+  }
+
+  void _getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      currentLocation = LatLng(position.latitude, position.longitude);
+    });
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
   @override
@@ -82,12 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
             iconSize: 40,
           ),
         ],
-<<<<<<< Updated upstream
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(130),
-          child: Padding(
-            padding: EdgeInsets.only(right: 300.0),
-=======
       ),
       body: Stack(
         children: [
@@ -99,10 +110,8 @@ class _MyHomePageState extends State<MyHomePage> {
               zoom: 19.0,
             ),
           ),
-          // 기존의 UI 요소들
           Padding(
-            padding: EdgeInsets.only(right: 200.0),
->>>>>>> Stashed changes
+            padding: EdgeInsets.only(right: 300.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -116,52 +125,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(
                   "${_weather?.temperature.round()}℃",
                 ),
-                Text(_weather?.mainCondition ?? "")
+                // Text(_weather?.mainCondition ?? "")
               ],
             ),
           ),
-<<<<<<< Updated upstream
-        ),
-      ),
-      body: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              child: Lottie.asset(
-                'images/fire.json',
-                width: 310,
-                height: 310,
-                fit: BoxFit.fill,
-              ),
-            ),
-            // Start 버튼
-            Transform.translate(
-              offset: Offset(5, -1),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/record', (route) => false);
-                },
-                highlightColor: Colors.grey,
-                splashColor: Colors.grey,
-                borderRadius: BorderRadius.circular(150.0),
-                child: Container(
-                  width: 300.0,
-                  height: 150.0,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '시작',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 35.0,
-                      ),
-=======
+          // 기존의 UI 요소들
           Positioned(
             bottom: 114,
             left: 40,
@@ -174,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           // Start 버튼
           Transform.translate(
-            offset: Offset(51, 224),
+            offset: Offset(50, 224),
             child: InkWell(
               onTap: () {
                 Navigator.pushNamedAndRemoveUntil(
@@ -197,34 +165,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 35.0,
->>>>>>> Stashed changes
                     ),
                   ),
                 ),
               ),
             ),
-
-            // 작은 원 1
-            Positioned(
-              bottom: 30,
-              left: 203,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CustomIconButton(),
-              ),
+          ),
+          // 작은 원 1
+          Positioned(
+            bottom: 150,
+            left: 100,
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: CustomIconButton(),
             ),
-<<<<<<< Updated upstream
-            // 작은 원 2
-            Positioned(
-              left: 133,
-              bottom: 0,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CustomIconButton(),
-              ),
-=======
           ),
           // 작은 원 2
           Positioned(
@@ -234,20 +189,19 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 50.0,
               height: 50.0,
               child: CustomIconButton(),
->>>>>>> Stashed changes
             ),
-            // 작은 원 3
-            Positioned(
-              bottom: 30,
-              right: 197,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CustomIconButton(),
-              ),
+          ),
+          // 작은 원 3
+          Positioned(
+            bottom: 150,
+            right: 100,
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: CustomIconButton(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: MenuBottom(currentIndex: 1),
     );
