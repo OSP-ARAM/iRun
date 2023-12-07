@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:irun/navi/navi.dart';
 import 'package:irun/mission/button.dart';
 import 'package:lottie/lottie.dart';
@@ -21,6 +24,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
   Weather? _weather;
   Position? _position;
+
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   GoogleMapController? mapController;
   LatLng? currentLocation;
@@ -64,21 +69,36 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _initCurrentLocationAndTracking();
     _fetchWeather();
   }
 
-  void _getCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _position = position;
-      currentLocation = LatLng(position.latitude, position.longitude);
+  Future<void> _initCurrentLocationAndTracking() async {
+      Position currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      _updateCameraPosition(currentPosition);
+      _startLocationTracking();
+  }
+
+  void _startLocationTracking() {
+    var locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 1,
+    );
+
+    _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((Position position) {
+      _updateCameraPosition(position);
     });
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  void _updateCameraPosition(Position position) {
+    setState(() {
+      currentLocation = LatLng(position.latitude, position.longitude);
+    });
+    mapController?.animateCamera(
+      CameraUpdate.newLatLng(currentLocation!),
+    );
   }
 
   @override
@@ -111,13 +131,21 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 // GoogleMap 및 기타 위젯들
                 GoogleMap(
-                  onMapCreated: _onMapCreated,
+                  onMapCreated: (GoogleMapController controller) {
+                    rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
+                      controller.setMapStyle(mapStyle);
+                      mapController = controller;
+                    });
+                  },
                   initialCameraPosition: CameraPosition(
                     target: currentLocation ?? LatLng(36.1433405, 128.393805),
                     // 금오공대 좌표를 기본값으로 설정
                     // 기본값 또는 원하는 다른 위치의 좌표로 설정
                     zoom: 16.0,
                   ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
                 ),
                 Padding(
                   padding: EdgeInsets.only(
@@ -231,7 +259,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+
     );
+  }
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();
+    super.dispose();
   }
 }
 // Scaffold(

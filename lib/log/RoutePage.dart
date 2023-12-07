@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RoutePage extends StatefulWidget {
@@ -66,8 +67,11 @@ class _RoutePageState extends State<RoutePage> {
         title: Text('Running Route'),
       ),
       body: GoogleMap(
-        onMapCreated: (controller) {
-          _mapController = controller;
+        onMapCreated: (GoogleMapController controller) {
+          rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
+            controller.setMapStyle(mapStyle);
+            _mapController = controller;
+          });
         },
         initialCameraPosition: CameraPosition(
           target: polylineCoordinates.isNotEmpty
@@ -78,6 +82,7 @@ class _RoutePageState extends State<RoutePage> {
         polylines: _polylines,
         markers: _markers, // 여기에 마커 세트 추가
         myLocationEnabled: true,
+        zoomControlsEnabled: false,
       ),
     );
   }

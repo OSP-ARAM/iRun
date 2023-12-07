@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,6 +27,8 @@ class _MapScreenState extends State<MapScreen> {
   FlutterTts tts = FlutterTts();
   Timer? _timer;
 
+  LatLng? currentPosition;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,7 @@ class _MapScreenState extends State<MapScreen> {
     Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
       _currentLocation = locationData;
+      _updateCameraPosition(_currentLocation!);
       _markers.add(
         Marker(
           markerId: MarkerId('startLocation'),
@@ -54,7 +58,8 @@ class _MapScreenState extends State<MapScreen> {
 
     _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
             (Position position) {
-          _updatePolyline(position);
+              _updateCameraPosition(position);
+              _updatePolyline(position);
         }
     );
 
@@ -72,19 +77,13 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _updatePolyline(Position position) {
+
     setState(() {
       _markers.add(
         Marker(
           markerId: MarkerId('point${_markers.length}'),
           position: LatLng(position.latitude, position.longitude),
           visible: false,
-        ),
-      );
-
-      // 카메라 위치 업데이트
-      _controller?.animateCamera(
-        CameraUpdate.newLatLng(
-          LatLng(position.latitude, position.longitude),
         ),
       );
 
@@ -109,6 +108,15 @@ class _MapScreenState extends State<MapScreen> {
         }
       }
     });
+  }
+
+  void _updateCameraPosition(Position position) {
+    setState(() {
+      currentPosition = LatLng(position.latitude, position.longitude);
+    });
+    _controller?.animateCamera(
+      CameraUpdate.newLatLng(currentPosition!),
+    );
   }
 
   double _calculateDistance(double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
@@ -197,8 +205,11 @@ class _MapScreenState extends State<MapScreen> {
           ),
           Expanded(
             child: GoogleMap(
-              onMapCreated: (controller) {
-                _controller = controller;
+              onMapCreated: (GoogleMapController controller) {
+                rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
+                  controller.setMapStyle(mapStyle);
+                  _controller = controller;
+                });
               },
               initialCameraPosition: CameraPosition(
                 target: LatLng(
@@ -210,7 +221,8 @@ class _MapScreenState extends State<MapScreen> {
               markers: Set.from(_markers),
               polylines: Set.from([_polyline]),
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
             ),
           ),
           Container(
