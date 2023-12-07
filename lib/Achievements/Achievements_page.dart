@@ -424,7 +424,7 @@ class _AchievementsPageState extends State<AchievementsPage>
             ),
           ],
         ),
-        bottomNavigationBar: const MenuBottom(currentIndex: 2),
+        //bottomNavigationBar: const MenuBottom(currentIndex: 2),
       ),
     );
   }

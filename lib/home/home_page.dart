@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:irun/navi/navi.dart';
 import 'package:irun/mission/button.dart';
 import 'package:lottie/lottie.dart';
+import 'package:irun/log/log_page.dart';
+import 'package:irun/ranking/ranking_page.dart';
+import 'package:irun/Achievements/Achievements_page.dart';
 
 import 'weather_model.dart';
 import 'weather_service.dart';
@@ -87,15 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       length: 4, // 탭바의 수 설정
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            'iRun',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 25.0,
-            ),
-          ),
-          bottom: TabBar(
+          title: TabBar(
             tabs: [
               Tab(text: '메인'), // 탭바의 각 항목 설정
               Tab(text: '기록'),
@@ -213,19 +208,19 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               // 두 번째 탭의 내용
               child: Center(
-                child: Text('Tab 2 Content'),
+                child: LogPage(),
               ),
             ),
             Container(
               // 두 번째 탭의 내용
               child: Center(
-                child: Text('Tab 3 Content'),
+                child: RankingPage(),
               ),
             ),
             Container(
               // 두 번째 탭의 내용
               child: Center(
-                child: Text('Tab 4 Content'),
+                child: AchievementsPage(),
               ),
             ),
           ],

@@ -73,7 +73,7 @@ class LogPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: MenuBottom(currentIndex: 0),
+      //bottomNavigationBar: MenuBottom(currentIndex: 0),
     );
   }
 }
