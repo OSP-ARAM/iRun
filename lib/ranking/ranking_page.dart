@@ -58,10 +58,6 @@ class _RankingPageState extends State<RankingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('랭킹'),
-        backgroundColor: Color(0xfff2f9fe),
-      ),
       body: Column(
         children: [
           Padding(

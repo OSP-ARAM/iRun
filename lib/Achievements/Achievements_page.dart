@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:irun/navi/navi.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:lottie/lottie.dart';
 
@@ -128,71 +127,85 @@ class _AchievementsPageState extends State<AchievementsPage>
     _initializeDatabase();
   }
 
+  Future<bool> checkIfCollectionExists(
+      String uid, String collectionName) async {
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(uid)
+        .collection(collectionName)
+        .get();
+    return querySnapshot.docs.isNotEmpty;
+  }
+
   Future<void> _initializeDatabase() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
+    bool isCollectionExists =
+    await checkIfCollectionExists(user!.uid, 'Mission');
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("distance3")
-        .set(distance3.toJson());
+    if (!isCollectionExists) {
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("distance3")
+          .set(distance3.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("distance5")
-        .set(distance5.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("distance5")
+          .set(distance5.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("distance10")
-        .set(distance10.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("distance10")
+          .set(distance10.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("time15")
-        .set(time15.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("time15")
+          .set(time15.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("time30")
-        .set(time30.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("time30")
+          .set(time30.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("time60")
-        .set(time60.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("time60")
+          .set(time60.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("pace550")
-        .set(pace550.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("pace550")
+          .set(pace550.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("pace600")
-        .set(pace600.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("pace600")
+          .set(pace600.toJson());
 
-    await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .collection("Mission")
-        .doc("pace630")
-        .set(pace630.toJson());
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Mission")
+          .doc("pace630")
+          .set(pace630.toJson());
+    }
 
     // "거리" 위젯에 대한 데이터 가져오기
     DocumentSnapshot snapshot3 = await firestore
@@ -279,9 +292,9 @@ class _AchievementsPageState extends State<AchievementsPage>
     Map<String, dynamic> toMap630 = snapshot630.data() as Map<String, dynamic>;
 
     setState(() {
-      _paceData.add(Mission.fromJson(toMap550));
-      _paceData.add(Mission.fromJson(toMap600));
       _paceData.add(Mission.fromJson(toMap630));
+      _paceData.add(Mission.fromJson(toMap600));
+      _paceData.add(Mission.fromJson(toMap550));
     });
   }
 
@@ -307,126 +320,74 @@ class _AchievementsPageState extends State<AchievementsPage>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '업적',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('업적'),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _buildCategory("거리 km", _distanceData, _distanceController),
+              const SizedBox(height: 16.0),
+              _buildCategory("시간 min", _timeData, _timeController),
+              const SizedBox(height: 16.0),
+              _buildCategory("페이스", _paceData, _paceController),
+            ],
+          ),
         ),
-        body: ListView(
-          shrinkWrap: true,
-          children: <Widget>[
-            Column(
-              children: [
-                const Text(
-                  "거리",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    backgroundColor: Colors.amberAccent,
-                  ),
-                ),
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                  ),
-                  itemCount: _distanceData.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: Lottie.asset(
-                        'assets/lottie/${_distanceData[index].state}_${_distanceData[index].lottieFileName}.json',
-                        controller: _distanceController[index],
-                        onLoaded: (composition) {
-                          _distanceController[index].duration =
-                              composition.duration;
-                          _distanceController[index].value =
-                              _distanceData[index].value *
-                                  _distanceData[index].num;
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
+      ),
+    );
+  }
+
+  Widget _buildCategory(
+      String title, List<Mission> data, List<AnimationController> controllers) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            title: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            Column(
-              children: [
-                const Text(
-                  "시간",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    backgroundColor: Colors.amberAccent,
-                  ),
-                ),
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                  ),
-                  itemCount: _timeData.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: Lottie.asset(
-                        'assets/lottie/${_timeData[index].state}_${_timeData[index].lottieFileName}.json',
-                        controller: _timeController[index],
-                        onLoaded: (composition) {
-                          _timeController[index].duration =
-                              composition.duration;
-                          _timeController[index].value =
-                              _timeData[index].value * _timeData[index].num;
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
+          ),
+          const SizedBox(height: 8.0),
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
             ),
-            Column(
-              children: [
-                const Text(
-                  "페이스",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    backgroundColor: Colors.amberAccent,
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              if (data.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return Card(
+                  elevation: 4.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Lottie.asset(
+                      'assets/lottie/${data[index].state}_${data[index].lottieFileName}.json',
+                      controller: controllers[index],
+                      onLoaded: (composition) {
+                        controllers[index].duration = composition.duration;
+                        controllers[index].value =
+                            data[index].value * data[index].num;
+                      },
+                    ),
                   ),
-                ),
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                  ),
-                  itemCount: _paceData.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: Lottie.asset(
-                        'assets/lottie/${_paceData[index].state}_${_paceData[index].lottieFileName}.json',
-                        controller: _paceController[index],
-                        onLoaded: (composition) {
-                          _paceController[index].duration =
-                              composition.duration;
-                          _paceController[index].value =
-                              _paceData[index].value * _paceData[index].num;
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        //bottomNavigationBar: const MenuBottom(currentIndex: 2),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }
 }
-
