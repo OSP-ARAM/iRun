@@ -26,7 +26,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showProperty1Home = false;
   final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
   Weather? _weather;
-  Position? _position;
 
   StreamSubscription<Position>? _positionStreamSubscription;
 
@@ -34,11 +33,10 @@ class _MyHomePageState extends State<MyHomePage> {
   LatLng? currentLocation;
 
   _fetchWeather() async {
-    // String cityName = await _weatherService.getCurrentCity();
-    String cityName = "Gumi";
-
+    Position position = await _weatherService.getCurrentCity();
     try {
-      final weather = await _weatherService.getWeather(cityName);
+      final weather = await _weatherService.getWeather(
+          position.longitude, position.latitude);
       setState(() {
         _weather = weather;
       });
@@ -77,10 +75,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _initCurrentLocationAndTracking() async {
-      Position currentPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      _updateCameraPosition(currentPosition);
-      _startLocationTracking();
+    Position currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    _updateCameraPosition(currentPosition);
+    _startLocationTracking();
   }
 
   void _startLocationTracking() {
@@ -89,8 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
       distanceFilter: 1,
     );
 
-    _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((Position position) {
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position position) {
       _updateCameraPosition(position);
     });
   }
@@ -127,7 +126,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 // GoogleMap 및 기타 위젯들
                 GoogleMap(
                   onMapCreated: (GoogleMapController controller) {
-                    rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
+                    rootBundle
+                        .loadString('assets/map/mapstyle.json')
+                        .then((String mapStyle) {
                       controller.setMapStyle(mapStyle);
                       mapController = controller;
                     });
@@ -149,9 +150,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: ClipOval(
                     child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
                       height: 80,
                       width: 80,
-                      color: Colors.white,
                       // 흰색 배경 설정
                       padding: EdgeInsets.all(0),
                       // 동그라미 내부 여백 설정
@@ -254,9 +258,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-
     );
   }
+
   @override
   void dispose() {
     _positionStreamSubscription?.cancel();
