@@ -27,7 +27,7 @@ Future<User?> signInWithGoogle() async {
 
       final User? currentUser = auth.currentUser;
       assert(user.uid == currentUser?.uid);
-      FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+      FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
         'displayName': user.displayName,
         'email': user.email,
         'photoURL': user.photoURL,

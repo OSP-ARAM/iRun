@@ -5,6 +5,7 @@ import 'oss_licenses_page.dart';
 import 'privacy_policy.dart';
 import 'terms_of_service.dart';
 import 'tts_setting_page.dart';
+import 'user_page.dart';
 
 class OptionPage extends StatelessWidget {
   const OptionPage({Key? key}) : super(key: key);
@@ -23,6 +24,15 @@ class OptionPage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
+          ListTile(
+            title: const Text('마이 페이지'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserPage()),
+              );
+            },
+          ),
           ListTile(
             title: const Text('개인정보 처리방침'),
             onTap: () {
