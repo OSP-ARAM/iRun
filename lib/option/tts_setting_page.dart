@@ -94,58 +94,81 @@ class _TTSSettingState extends State<TTSSetting> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('TTS 설정'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'TTS 설정 ',
-                textAlign: TextAlign.start,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const Text(
+                    'TTS 켜기 ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Switch(
+                    value: isSetted,
+                    onChanged: (value) {
+                      setState(() {
+                        isSetted = value;
+                      });
+                    },
+                    activeColor: Colors.purple,
+                  ),
+                ],
               ),
-              Switch(
-                value: isSetted,
-                onChanged: (value) {
-                  setState(() {
-                    isSetted = value;
-                  });
-                },
-                activeColor: Colors.purple,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ToggleButtons(
+                    direction: Axis.horizontal,
+                    isSelected: isSelected,
+                    onPressed: toggleSelect,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: SizedBox(
+                          width: screenWidth / 3 - 60, // 화면 너비의 절반 크기로 설정
+                          child: const Text(
+                            '여성',
+                            style: TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: SizedBox(
+                          width: screenWidth / 3 - 60, // 화면 너비의 절반 크기로 설정
+                          child: const Text(
+                            '남성',
+                            style: TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-          ToggleButtons(
-            direction: Axis.horizontal,
-            isSelected: isSelected,
-            onPressed: toggleSelect,
-            children: const [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  '여성',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  '남성',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ],
-          ),
-          ElevatedButton(
-              onPressed: () {
-                isSetted ? _speak('10km 1시간 페이스 30') : print(' ');
-              },
-              child: const Text('내용 읽기')),
-        ],
+            ),
+            const Text(
+              '웹으로 작동 시 남성 TTS의 목소리는 작동하지 않습니다.',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }
