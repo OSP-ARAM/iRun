@@ -3,12 +3,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:irun/Achievements/achievements_page.dart';
 import 'package:irun/home/home_page.dart';
 import 'package:irun/log/log_page.dart';
+import 'package:irun/mission/mission_page.dart';
+import 'package:irun/music/music_page.dart';
 import 'package:irun/option/option_page.dart';
 import 'package:irun/ranking/ranking_page.dart';
 import 'firebase_options.dart';
 import 'package:irun/record/record_page.dart';
 import 'package:irun/login/body_measurement_page.dart';
-
+import 'package:audio_service/audio_service.dart';
+import 'package:provider/provider.dart';
 import 'login/login_page.dart';
 
 void main() async {
@@ -16,7 +19,24 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => MissionData(),
+    child: MyApp(),
+  ));
+  _startBackgroundTask();
+}
+
+Future<void> _startBackgroundTask() async {
+  await AudioService.start(
+    backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
+    androidNotificationChannelName: 'Music Player',
+    androidNotificationColor: 0xFF2196f3,
+    androidNotificationIcon: 'mipmap/ic_launcher',
+  );
+}
+
+void _audioPlayerTaskEntrypoint() {
+  AudioServiceBackground.run(() => AudioPlayerTask());
 }
 
 class MyApp extends StatelessWidget {
@@ -35,7 +55,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/' : (context) => LoginPage(),
         '/home' : (context) => MyHomePage(),
-        // '/mission' : (context) => MissionPage(),
+        '/music' : (context) => MusicPage(),
         '/ranking' : (context) => RankingPage(),
         '/option' : (context) => OptionPage(),
         '/record' : (context) => MapScreen(),

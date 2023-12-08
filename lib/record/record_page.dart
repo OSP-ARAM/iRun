@@ -6,13 +6,22 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:irun/login/login_api.dart';
+import 'package:irun/mission/mission_page.dart';
+import 'package:irun/option/tts_setting_page.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
+
+  final User? user = auth.currentUser;
+
   GoogleMapController? _controller;
   List<Marker> _markers = [];
   Polyline _polyline = Polyline(
@@ -24,7 +33,10 @@ class _MapScreenState extends State<MapScreen> {
   double _totalDistance = 0.0;
   Stopwatch _stopwatch = Stopwatch();
   StreamSubscription<Position>? _positionStreamSubscription;
+
   FlutterTts tts = FlutterTts();
+  bool isSetted = false;
+
   Timer? _timer;
 
   LatLng? currentPosition;
@@ -32,7 +44,22 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+   // _initTTS();
     _getCurrentLocationAndStartRecording();
+  }
+
+  // Future<void> _initTTS() async {
+  //   isSetted = await TTSSettingState.getIsSetted();
+  //   if (isSetted) {
+  //     tts = await TTSSetting.getTtsWithSettings(); // tts 인스턴스를 설정으로 업데이트
+  //     tts.speak('러닝을 시작합니다. 힘내세요!');
+  //   }
+  // }
+
+  void _speak(String message) async {
+    if (isSetted) {
+      await tts.speak(message);
+    }
   }
 
   Future<void> _getCurrentLocationAndStartRecording() async {
@@ -58,8 +85,8 @@ class _MapScreenState extends State<MapScreen> {
 
     _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
             (Position position) {
-              _updateCameraPosition(position);
-              _updatePolyline(position);
+          _updateCameraPosition(position);
+          _updatePolyline(position);
         }
     );
 
@@ -105,6 +132,10 @@ class _MapScreenState extends State<MapScreen> {
             color: Colors.blue,
             points: _markers.map((marker) => marker.position).toList(),
           );
+
+          if (_totalDistance >= 1000 * (_markers.length - 1)) {
+            _speak('현재, ${(_totalDistance / 1000).toStringAsFixed(1)} 킬로미터 달렸습니다.');
+          }
         }
       }
     });
@@ -146,19 +177,37 @@ class _MapScreenState extends State<MapScreen> {
 
   String _calculatePace(double distance, int milliseconds) {
     if (distance == 0 || milliseconds == 0) {
-      return '0.00 min/km';
+      return "0'00''";
     }
     double minutes = milliseconds / 60000.0;
     double distanceKm = distance / 1000.0;
     double pace = minutes / distanceKm;
-    return pace.toStringAsFixed(2) + ' min/km';
+
+    // 분과 초로 분리
+    int paceMinutes = pace.floor();
+    int paceSeconds = ((pace - paceMinutes) * 60).round();
+
+    // 두 자릿수 형식으로 맞춤
+    String formattedSeconds = paceSeconds.toString().padLeft(2, '0');
+
+    return "$paceMinutes'$formattedSeconds''";
   }
 
+
   void _uploadDataToFirestore() async {
+    final missionData = Provider.of<MissionData>(context, listen: false);
+
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
     if (_currentLocation != null && _markers.isNotEmpty) {
       String formattedTime = _formatTime(_stopwatch.elapsedMilliseconds);
 
       String formattedDistance = (_totalDistance / 1000).toStringAsFixed(2);
+
+      String pace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
+
+      DateTime now = DateTime.now();
+      String timestamp = now.toIso8601String(); // ISO 8601 형식으로 변환
 
       List<Map<String, double>> routePoints = _markers.map((marker) {
         return {
@@ -167,12 +216,426 @@ class _MapScreenState extends State<MapScreen> {
         };
       }).toList();
 
-      await FirebaseFirestore.instance.collection('running_records').add({
-        'duration': formattedTime,
-        'distance': formattedDistance,
-        'timestamp': DateTime.now(),
-        'route': routePoints,
-      });
+      List<String> parts = formattedTime.split(':');
+
+      // 시(hour), 분(minute)을 각각 정수로 변환
+      int hours = int.parse(parts[0]);
+      int minutes = int.parse(parts[1]);
+
+      // 총 시간을 분으로 계산
+      int totalMinutes = hours * 60 + minutes;
+
+      String calculatedPace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
+
+      // 페이스 문자열을 분과 초로 분리
+      List<String> paceParts = calculatedPace.split("'");
+      int paceMinutes = int.parse(paceParts[0]); // 분
+      int paceSeconds = int.parse(paceParts[1].replaceAll("''", "")); // 초
+
+      RunData runData = RunData(
+        duration: formattedTime,
+        distance: formattedDistance,
+        timestamp: DateTime.now(),
+        routePoints: routePoints,
+        pace: pace,
+      );
+
+      // Run record 컬렉션에 저장
+      await firestore
+          .collection("Users")
+          .doc(user!.uid)
+          .collection("Run record")
+          .doc(timestamp)
+          .set(runData.toJson());
+
+      // Mission 컬렉션에 저장 (3km)
+      if (missionData.distance == '3km') {
+        String lottieFileName = "distance3";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (double.parse(formattedDistance) >= 3.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (double.parse(formattedDistance) >= 3.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //5km
+      if (missionData.distance == '5km') {
+        String lottieFileName = "distance5";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (double.parse(formattedDistance) >= 5.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (double.parse(formattedDistance) >= 5.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //10km
+      if (missionData.distance == '10km') {
+        String lottieFileName = "distance10";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (double.parse(formattedDistance) >= 10.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (double.parse(formattedDistance) >= 10.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //time15
+      if (missionData.time == '15분') {
+        String lottieFileName = "time15";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (totalMinutes >= 15.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (totalMinutes >= 10.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //time30
+      if (missionData.time == '30분') {
+        String lottieFileName = "time30";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (totalMinutes >= 30.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (totalMinutes >= 30.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //time60
+      if (missionData.time == '1시간') {
+        String lottieFileName = "time60";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (totalMinutes >= 60.0) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (totalMinutes >= 60.0) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //pace 630
+      if (missionData.pace == '630') {
+        String lottieFileName = "pace630";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) ? 1 : 0;
+          state = "bronze";
+        }
+
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //pace 600
+      if (missionData.pace == '600') {
+        String lottieFileName = "pace600";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) ? 1 : 0;
+          state = "bronze";
+        }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
+
+      //pace 550
+      if (missionData.pace == '550') {
+        String lottieFileName = "pace550";
+        String state;
+        int num;
+
+        DocumentSnapshot snapshot = await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .get();
+
+        if (snapshot.exists) {
+          var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
+
+          if (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) {
+            num++;
+          }
+
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
+        } else {
+          num = (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) ? 1 : 0;
+          state = "bronze";
+        }
+
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
+      }
     }
   }
 
@@ -243,5 +706,32 @@ class _MapScreenState extends State<MapScreen> {
     _positionStreamSubscription?.cancel();
     _timer?.cancel();
     super.dispose();
+  }
+
+}
+
+class RunData {
+  final String duration;
+  final String distance;
+  final DateTime timestamp;
+  final String pace;
+  final List<Map<String, double>> routePoints;
+
+  RunData({
+    required this.duration,
+    required this.distance,
+    required this.pace,
+    required this.timestamp,
+    required this.routePoints,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'duration': duration,
+      'distance': distance,
+      'timestamp': timestamp,
+      'route': routePoints,
+      'pace' : pace,
+    };
   }
 }

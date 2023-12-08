@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:irun/navi/navi.dart';
 import 'package:irun/mission/button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:irun/log/log_page.dart';
@@ -14,6 +13,8 @@ import 'weather_service.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import 'package:irun/mission/mission_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -229,11 +230,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 Positioned(
                   left: 260,
                   bottom: 80,
-                  child: SizedBox(
+                  child: Container(
                     width: 50.0,
                     height: 50.0,
-                    child: CustomIconButton(),
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/music');
+                      },
+                      icon: Icon(Icons.music_note),
+                      iconSize: 30,
+                      color: Colors.white,
+                    ),
                   ),
+                ),
+                Positioned(
+                  top: 100,
+                  left: 0,
+                  child: SelectedMissionsWidget(),
                 ),
               ],
             ),
@@ -267,6 +284,27 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 }
+
+class SelectedMissionsWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final missionData = Provider.of<MissionData>(context);
+
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('선택된 미션', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          if (missionData.time != null) Text('시간: ${missionData.time}'),
+          if (missionData.distance != null) Text('거리: ${missionData.distance}'),
+          if (missionData.pace != null) Text('페이스: ${missionData.pace}'),
+        ],
+      ),
+    );
+  }
+}
+
 // Scaffold(
 //       appBar: AppBar(
 //         title: Text(
