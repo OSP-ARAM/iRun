@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592989854108",
+    "project_id": "irun-js",
+    "storage_bucket": "irun-js.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592989854108:android:92faaa7ecbf40ce68bd059",
+        "android_client_info": {
+          "package_name": "com.example.irun"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8XeIYOAvJSRsfGjOpM4N6FPf6YPEk98U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
