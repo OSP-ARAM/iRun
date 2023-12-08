@@ -12,13 +12,13 @@ String? uid = currentUser?.uid;
 
 Future<List<Map<String, dynamic>>> getAllUserProfiles() async {
   QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').get();
+  await FirebaseFirestore.instance.collection('Users').get();
 
   return querySnapshot.docs.map((doc) =>
-    {
-      'uid': doc.id,
-      ...doc.data() as Map<String, dynamic>,
-    }
+  {
+    'uid': doc.id,
+    ...doc.data() as Map<String, dynamic>,
+  }
   ).toList();
 }
 
@@ -58,10 +58,6 @@ class _RankingPageState extends State<RankingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('랭킹'),
-        backgroundColor: Color(0xfff2f9fe),
-      ),
       body: Column(
         children: [
           Padding(
