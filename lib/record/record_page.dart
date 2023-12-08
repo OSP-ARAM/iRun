@@ -85,8 +85,8 @@ class _MapScreenState extends State<MapScreen> {
 
     _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
             (Position position) {
-              _updateCameraPosition(position);
-              _updatePolyline(position);
+          _updateCameraPosition(position);
+          _updatePolyline(position);
         }
     );
 
@@ -225,16 +225,13 @@ class _MapScreenState extends State<MapScreen> {
       // 총 시간을 분으로 계산
       int totalMinutes = hours * 60 + minutes;
 
-
       String calculatedPace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
 
-// 페이스 문자열을 분과 초로 분리
+      // 페이스 문자열을 분과 초로 분리
       List<String> paceParts = calculatedPace.split("'");
       int paceMinutes = int.parse(paceParts[0]); // 분
       int paceSeconds = int.parse(paceParts[1].replaceAll("''", "")); // 초
 
-
-      // distance3 객체 생성
       RunData runData = RunData(
         duration: formattedTime,
         distance: formattedDistance,
@@ -251,418 +248,393 @@ class _MapScreenState extends State<MapScreen> {
           .doc(timestamp)
           .set(runData.toJson());
 
-      // distance3 객체 생성
-      MissionRecord missionRecord = MissionRecord(
-        distance: formattedDistance,
-        numberSuccesses: 0,
-        missionLevel: 1,
-      );
-
-      // Mission 컬렉션에 저장
+      // Mission 컬렉션에 저장 (3km)
       if (missionData.distance == '3km') {
-        if (double.parse(formattedDistance) >= 3.0){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "distance3";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("distance3")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (double.parse(formattedDistance) >= 3.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance3")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance3")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (double.parse(formattedDistance) >= 3.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //5km
       if (missionData.distance == '5km') {
-        if (double.parse(formattedDistance) >= 5.0) {
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "distance5";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("distance5")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses +
-              missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (double.parse(formattedDistance) >= 5.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance5")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level': updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance5")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (double.parse(formattedDistance) >= 5.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //10km
       if (missionData.distance == '10km') {
-        if (double.parse(formattedDistance) >= 10.0){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "distance10";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("distance10")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (double.parse(formattedDistance) >= 10.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance10")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("distance10")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (double.parse(formattedDistance) >= 10.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //time15
       if (missionData.time == '15분') {
-        if (totalMinutes >= 15){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "time15";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("time15")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (totalMinutes >= 15.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time15")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time15")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (totalMinutes >= 10.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //time30
       if (missionData.time == '30분') {
-        if (totalMinutes >= 30){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "time30";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("time30")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (totalMinutes >= 30.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time30")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time30")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (totalMinutes >= 30.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //time60
       if (missionData.time == '1시간') {
-        if (totalMinutes >= 60){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "time60";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("time60")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (totalMinutes >= 60.0) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time60")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("time60")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (totalMinutes >= 60.0) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //pace 630
       if (missionData.pace == '630') {
-        if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "pace630";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("pace630")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace630")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace630")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) ? 1 : 0;
+          state = "bronze";
         }
+
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //pace 600
       if (missionData.pace == '600') {
-        if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "pace600";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("pace600")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace600")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace600")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) ? 1 : 0;
+          state = "bronze";
         }
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
 
+      //pace 550
       if (missionData.pace == '550') {
-        if (paceMinutes < 5 || (paceMinutes == 6 && paceSeconds <= 50)){
-          missionRecord.numberSuccesses = 1;
-        }
+        String lottieFileName = "pace550";
+        String state;
+        int num;
+
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
             .doc(user!.uid)
             .collection("Mission")
-            .doc("pace550")
+            .doc(lottieFileName)
             .get();
 
         if (snapshot.exists) {
-          // 문서가 존재하면, 기존 데이터를 가져옵니다.
           var data = snapshot.data() as Map<String, dynamic>;
+          num = data['num'] ?? 0;
+          state = data['state'] ?? "bronze";
 
-          // 'numberSuccesses' 값을 가져와서 새로운 값을 더합니다.
-          int currentNumberSuccesses = data['numberSuccesses'] ?? 0;
-          int updatedNumberSuccesses = currentNumberSuccesses + missionRecord.numberSuccesses; // 또는 적절한 로직으로 값을 증가시킵니다.
+          if (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) {
+            num++;
+          }
 
-          //total distance가져와서 합산
-          double currentTotalDistance = double.parse(data['distance']);
-          currentTotalDistance += double.parse(missionRecord.distance);
-          String updatedDistance = currentTotalDistance.toString();
-
-          int currentLevel = data['level'] ?? 0;
-          int updatedLevel = currentLevel + missionRecord.missionLevel;
-
-          // 변경된 데이터로 문서를 업데이트합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace550")
-              .update({'numberSuccesses': updatedNumberSuccesses, 'distance': updatedDistance, 'level' : updatedLevel});
+          if (num >= 10 && state != "gold") {
+            num = 0;
+            if (state == "bronze") {
+              state = "silver";
+            } else if (state == "silver") {
+              state = "gold";
+            }
+          }
         } else {
-          // 문서가 존재하지 않으면, 새 문서를 생성합니다.
-          await firestore
-              .collection("Users")
-              .doc(user!.uid)
-              .collection("Mission")
-              .doc("pace550")
-              .set(missionRecord.toJson()); // 초기 값으로 1 설정
+          num = (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) ? 1 : 0;
+          state = "bronze";
         }
+
+
+        await firestore
+            .collection("Users")
+            .doc(user!.uid)
+            .collection("Mission")
+            .doc(lottieFileName)
+            .update({'num': num, 'state': state});
       }
     }
   }
@@ -760,26 +732,6 @@ class RunData {
       'timestamp': timestamp,
       'route': routePoints,
       'pace' : pace,
-    };
-  }
-}
-
-class MissionRecord {
-  String distance;
-  int numberSuccesses;
-  int missionLevel;
-
-  MissionRecord({
-    required this.distance,
-    required this.numberSuccesses,
-    required this.missionLevel,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'distance': distance,
-      'numberSuccesses': numberSuccesses,
-      'level' : missionLevel,
     };
   }
 }
