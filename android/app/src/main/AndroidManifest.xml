@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <application
         android:label="irun"
         android:name="${applicationName}"
@@ -34,5 +35,13 @@
         <!-- googlemaps 설정 -->
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDcoBZMz_l-snvzKm02KGdjhNS7vyLHZsE"/>
+        <service
+            android:name="com.yourpackage.YourAudioService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>

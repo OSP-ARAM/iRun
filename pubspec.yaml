@@ -38,6 +38,11 @@ dependencies:
   shared_preferences:
   geolocator: ^10.1.0
   geocoding: ^2.1.1
+  provider:
+  assets_audio_player:
+  audio_service:
+  just_audio:
+  just_audio_background:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -85,6 +90,7 @@ flutter:
     - images/thunder.json
     - assets/lottie/
     - assets/map/mapstyle.json
+    - assets/music/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
