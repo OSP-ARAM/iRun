@@ -44,17 +44,17 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-   // _initTTS();
+    _initTTS();
     _getCurrentLocationAndStartRecording();
   }
 
-  // Future<void> _initTTS() async {
-  //   isSetted = await TTSSettingState.getIsSetted();
-  //   if (isSetted) {
-  //     tts = await TTSSetting.getTtsWithSettings(); // tts 인스턴스를 설정으로 업데이트
-  //     tts.speak('러닝을 시작합니다. 힘내세요!');
-  //   }
-  // }
+   Future<void> _initTTS() async {
+     isSetted = await TTSSettingState.getIsSetted();
+     if (isSetted) {
+       tts = await TTSSetting.getTtsWithSettings(); // tts 인스턴스를 설정으로 업데이트
+       tts.speak('러닝을 시작합니다. 힘내세요!');
+     }
+   }
 
   void _speak(String message) async {
     if (isSetted) {
