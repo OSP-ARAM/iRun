@@ -90,6 +90,9 @@ flutter:
     - images/thunder.json
     - assets/lottie/
     - assets/map/mapstyle.json
+    - assets/music/song1.ogg
+    - assets/music/song2.ogg
+    - assets/music/song3.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

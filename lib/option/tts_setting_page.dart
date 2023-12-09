@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TTSSetting extends StatefulWidget {
-  final FlutterTts tts = FlutterTts();
+  static final TTSSettingState _instance = TTSSettingState();
 
-  FlutterTts getTts() {
-    return tts;
+  static Future<FlutterTts> getTtsWithSettings() async {
+    await _instance.loadSettings();
+    return _instance.tts;
   }
 
-  TTSSetting({super.key});
+  const TTSSetting({Key? key}) : super(key: key);
 
   @override
-  State<TTSSetting> createState() => _TTSSettingState();
+  State<TTSSetting> createState() => TTSSettingState();
 }
 
-class _TTSSettingState extends State<TTSSetting> {
-  FlutterTts tts = FlutterTts();
+class TTSSettingState extends State<TTSSetting> {
+  final FlutterTts tts = FlutterTts();
 
   String language = "ko-KR";
   Map<String, String> voice = {"name": "ko-kr-x-ism-local", "locale": "ko-KR"};
@@ -34,18 +36,24 @@ class _TTSSettingState extends State<TTSSetting> {
   @override
   void initState() {
     super.initState();
-
-    // TTS 초기 설정
-    initTts();
-
-    // 여성, 남성 결정
-    isSelected = [isWoman, isMan];
+    loadSettings();
   }
 
-  // TTS 초기 설정
-  initTts() async {
-    //await initTtsIosOnly(); // iOS 설정
+  Future<void> loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    if (mounted) {
+      setState(() {
+        isSetted = prefs.getBool('isSetted') ?? false;
+        isWoman = prefs.getBool('isWoman') ?? true;
+        isMan = prefs.getBool('isMan') ?? false;
+        isSelected = [isWoman, isMan];
+        initTts();
+      });
+    }
+  }
+
+  Future<void> initTts() async {
     tts.setLanguage(language);
     tts.setVoice(voice);
     tts.setEngine(engine);
@@ -54,28 +62,14 @@ class _TTSSettingState extends State<TTSSetting> {
     tts.setSpeechRate(rate);
   }
 
-  // // TTS iOS 옵션
-  // Future<void> initTtsIosOnly() async {
-  //   // iOS 전용 옵션 : 공유 오디오 인스턴스 설정
-  //   await tts.setSharedInstance(true);
-
-  //   // 배경 음악와 인앱 오디오 세션을 동시에 사용
-  //   await tts.setIosAudioCategory(
-  //       IosTextToSpeechAudioCategory.ambient,
-  //       [
-  //         IosTextToSpeechAudioCategoryOptions.allowBluetooth,
-  //         IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-  //         IosTextToSpeechAudioCategoryOptions.mixWithOthers
-  //       ],
-  //       IosTextToSpeechAudioMode.voicePrompt);
-  // }
-
-  // TTS로 읽어주기
-  Future _speak(voiceText) async {
-    tts.speak(voiceText);
+  Future<void> speak(voiceText) async {
+    try {
+      await tts.speak(voiceText);
+    } catch (e) {
+      print('Failed to speak: $e');
+    }
   }
 
-  //여성, 남성 토글 선택
   void toggleSelect(value) {
     if (value == 0) {
       isWoman = true;
@@ -88,8 +82,33 @@ class _TTSSettingState extends State<TTSSetting> {
     }
     setState(() {
       isSelected = [isWoman, isMan];
+      print(voice);
       tts.setVoice(voice);
     });
+  }
+
+  @override
+  void dispose() {
+    saveSettings();
+    super.dispose();
+  }
+
+  void saveSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isSetted', isSetted);
+    prefs.setBool('isWoman', isWoman);
+    prefs.setBool('isMan', isMan);
+  }
+
+  // 공유 설정 저장 및 불러오기
+  static Future<void> saveIsSetted(bool isSetted) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isSetted', isSetted);
+  }
+
+  static Future<bool> getIsSetted() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isSetted') ?? false;
   }
 
   @override
