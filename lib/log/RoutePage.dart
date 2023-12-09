@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 
 class RoutePage extends StatefulWidget {
   final Map<String, dynamic> routeData;
@@ -28,7 +30,7 @@ class _RoutePageState extends State<RoutePage> {
 
     // List<dynamic>을 List<Map<String, dynamic>>으로 변환
     List<Map<String, dynamic>> coordinatesList =
-    coordinatesListDynamic.cast<Map<String, dynamic>>();
+        coordinatesListDynamic.cast<Map<String, dynamic>>();
 
     print(coordinatesList);
 
@@ -69,92 +71,190 @@ class _RoutePageState extends State<RoutePage> {
 
   @override
   Widget build(BuildContext context) {
+    Timestamp timestamp = widget.routeData['timestamp'] as Timestamp;
+    DateTime dateTime = timestamp.toDate();
+    String formattedDateTime = DateFormat('yyy/MM/dd HH:mm').format(dateTime);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Running Route'),
+        title: Text(
+          '기록 상세',
+        ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          GoogleMap(
-            onMapCreated: (GoogleMapController controller) {
-              rootBundle
-                  .loadString('assets/map/mapstyle.json')
-                  .then((String mapStyle) {
-                controller.setMapStyle(mapStyle);
-                _mapController = controller;
-              });
-            },
-            initialCameraPosition: CameraPosition(
-              target: polylineCoordinates.isNotEmpty
-                  ? polylineCoordinates.first
-                  : LatLng(0, 0),
-              zoom: 15,
+          Container(
+            padding: EdgeInsets.all(16),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${formattedDateTime}', // 원하는 텍스트로 변경
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            polylines: _polylines,
-            markers: _markers,
-            myLocationEnabled: true,
-            zoomControlsEnabled: false,
           ),
-          Positioned(
-            top: 20, // 상단 여백 조정
-            left: 20, // 좌측 여백 조정
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
+          Container(
+            height: 300,
+            child: GoogleMap(
+              onMapCreated: (GoogleMapController controller) {
+                rootBundle
+                    .loadString('assets/map/mapstyle.json')
+                    .then((String mapStyle) {
+                  controller.setMapStyle(mapStyle);
+                  _mapController = controller;
+                });
+              },
+              initialCameraPosition: CameraPosition(
+                target: polylineCoordinates.isNotEmpty
+                    ? polylineCoordinates.first
+                    : LatLng(0, 0),
+                zoom: 15,
+              ),
+              polylines: _polylines,
+              markers: _markers,
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['duration'].substring(1)}', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '시간', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Text(
-                  '거리: ${widget.routeData['distance']} km'), // 여기에 텍스트 내용 추가
-            ),
-          ),
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['pace']}', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '페이스', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Text('시간: ${widget.routeData['duration']}'),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['distance']}km', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '거리', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Text('페이스: ${widget.routeData['pace']}'),
-            ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '990', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '칼로리', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '성공한 미션', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '여기에 작업', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
