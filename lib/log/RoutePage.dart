@@ -73,74 +73,26 @@ class _RoutePageState extends State<RoutePage> {
   Widget build(BuildContext context) {
     Timestamp timestamp = widget.routeData['timestamp'] as Timestamp;
     DateTime dateTime = timestamp.toDate();
-    String formattedDateTime =
-        DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    String formattedDateTime = DateFormat('yyy/MM/dd HH:mm').format(dateTime);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${formattedDateTime}',
+          '기록 상세',
         ),
       ),
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '시간 : ${widget.routeData['duration']}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+          Container(
+            padding: EdgeInsets.all(16),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${formattedDateTime}', // 원하는 텍스트로 변경
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${widget.routeData['distance']}km',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16),
-                alignment: Alignment.center,
-                child: Text(
-                  '평균 페이스 : ${widget.routeData['pace']}', // 원하는 텍스트로 변경
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(16),
-                alignment: Alignment.center,
-                child: Text(
-                  '칼로리 : ???', // 원하는 텍스트로 변경
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           Container(
             height: 300,
@@ -165,16 +117,144 @@ class _RoutePageState extends State<RoutePage> {
               zoomControlsEnabled: false,
             ),
           ),
-          Container(
-            padding: EdgeInsets.all(16),
-            alignment: Alignment.center,
-            child: Text(
-              '선택한 미션 및 성공한 미션 표시', // 원하는 텍스트로 변경
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['duration'].substring(1)}', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '시간', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['pace']}', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '페이스', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '${widget.routeData['distance']}km', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '거리', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '990', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '칼로리', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '성공한 미션', // 원하는 첫 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '여기에 작업', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
