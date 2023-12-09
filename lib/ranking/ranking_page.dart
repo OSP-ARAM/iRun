@@ -22,13 +22,40 @@ Future<List<Map<String, dynamic>>> getAllUserProfiles() async {
   ).toList();
 }
 
+Future<double> getTotalDistance(String userId) async {
+  double totalDistance = 0.0;
+
+  QuerySnapshot runRecords = await FirebaseFirestore.instance
+      .collection('Users')
+      .doc(userId)
+      .collection('Run record')
+      .get();
+
+  for (var record in runRecords.docs) {
+    var data = record.data() as Map<String, dynamic>? ?? {};
+
+    var distanceValue = data['distance'];
+    double distance = 0.0;
+
+    if (distanceValue is String) {
+      distance = double.tryParse(distanceValue) ?? 0.0;
+    } else if (distanceValue is double) {
+      distance = distanceValue;
+    }
+
+    totalDistance += distance;
+  }
+
+  return totalDistance;
+}
+
 int calculateMyRankingIndex(String myUid, List<QueryDocumentSnapshot> userDocs) {
   for (int i = 0; i < userDocs.length; i++) {
     if (userDocs[i].id == myUid) {
-      return i; // 순위 (0부터 시작하는 인덱스)
+      return i;
     }
   }
-  return -1; // 사용자를 찾지 못한 경우
+  return -1;
 }
 
 class _RankingPageState extends State<RankingPage> {
@@ -40,9 +67,24 @@ class _RankingPageState extends State<RankingPage> {
   bool viewMyRanking = false;
 
   List<Map<String, dynamic>> users = [];
-  Future<void> loadUserProfiles() async {
-    var userProfiles = await getAllUserProfiles();
+  Future<void> loadUserProfilesAndRank() async {
+    List<Map<String, dynamic>> userProfiles = await getAllUserProfiles();
+    List<Future<double>> distanceFutures = [];
+
+    for (var userProfile in userProfiles) {
+      distanceFutures.add(getTotalDistance(userProfile['uid']));
+    }
+
+    List<double> distances = await Future.wait(distanceFutures);
+
+    for (int i = 0; i < userProfiles.length; i++) {
+      userProfiles[i]['totalDistance'] = distances[i];
+    }
+
+    userProfiles.sort((a, b) => b['totalDistance'].compareTo(a['totalDistance']));
+
     int myIndex = userProfiles.indexWhere((user) => user['uid'] == uid);
+
     setState(() {
       users = userProfiles;
       myRankingIndex = myIndex;
@@ -52,7 +94,7 @@ class _RankingPageState extends State<RankingPage> {
   @override
   void initState() {
     super.initState();
-    loadUserProfiles();
+    loadUserProfilesAndRank();
   }
 
   @override
@@ -77,11 +119,21 @@ class _RankingPageState extends State<RankingPage> {
                     return Card(
                       color: index == myRankingIndex ? Colors.yellow : null,
                       child: ListTile(
-                        leading: user['photoURL'] != null
-                            ? Image.network(user['photoURL'])
-                            : CircleAvatar(child: Icon(Icons.person)),
-                        title: Text(user['displayName'] ?? 'No Name'),
-                        subtitle: Text('티어: ${user['tier']}'),
+                        leading: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 30,
+                              child: Text('${index + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                            ),
+                            SizedBox(width: 20), // 숫자와 이미지 사이의 간격
+                            user['photoURL'] != null
+                                ? Image.network(user['photoURL'], width: 40, height: 40)
+                                : CircleAvatar(child: Icon(Icons.person)),
+                          ],
+                        ),
+                        title: Text(user['displayName'] ?? 'No Name', style: TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('총 거리 : ${user['totalDistance'].toStringAsFixed(2)} km'),
                       ),
                     );
                   } else {

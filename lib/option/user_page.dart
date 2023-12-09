@@ -35,8 +35,8 @@ class _UserPageState extends State<UserPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>? ?? {};
 
     setState(() {
-      height = userData['height'];
-      weight = userData['weight'];
+      height = (userData['height'] as num).toDouble();
+      weight = (userData['weight'] as num).toDouble();
     });
   }
 
