@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:irun/navi/navi.dart';
 import 'package:intl/intl.dart';
 import 'package:irun/log/RoutePage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:irun/login/login_api.dart';
 
 class LogPage extends StatelessWidget {
   const LogPage({Key? key}) : super(key: key);
 
-  void _viewRoute(BuildContext context, List<dynamic> routeData) {
+  void _viewRoute(BuildContext context, Map<String, dynamic> routeData) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RoutePage(routeData: routeData)),
@@ -16,6 +17,9 @@ class LogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 로그인한 사용자의 UID를 가져옵니다.
+    final User? user = auth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
@@ -28,7 +32,12 @@ class LogPage extends StatelessWidget {
             SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('running_records').orderBy('timestamp', descending: true).snapshots(),
+                // 사용자의 'Run record' 컬렉션에서 모든 문서를 불러옵니다.
+                stream: FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(user!.uid)
+                    .collection("Run record")
+                    .orderBy('timestamp', descending: true).snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
@@ -54,10 +63,10 @@ class LogPage extends StatelessWidget {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('거리: ${data['distance']} km'), // 킬로미터 단위로 표시
+                            Text('거리: ${data['distance']} km'),
                             Text('시간: ${data['duration']}'),
                             TextButton(
-                              onPressed: () => _viewRoute(context, data['route']),
+                              onPressed: () => _viewRoute(context, data),
                               child: Text('루트 보기'),
                             ),
                           ],
@@ -73,7 +82,6 @@ class LogPage extends StatelessWidget {
           ],
         ),
       ),
-      //bottomNavigationBar: MenuBottom(currentIndex: 0),
     );
   }
 }
