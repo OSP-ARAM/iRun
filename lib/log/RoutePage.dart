@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:irun/login/login_api.dart';
 
 class RoutePage extends StatefulWidget {
   final Map<String, dynamic> routeData;
@@ -18,12 +20,21 @@ class _RoutePageState extends State<RoutePage> {
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   Set<Marker> _markers = {};
+  final User? user = auth.currentUser;
+
+
 
   @override
   void initState() {
     super.initState();
+    successful();
     _createPolylines();
   }
+
+  Future<void> successful() async {
+    Map<String, List<String>> successfulMissions = widget.routeData['successfulMissions'];
+  }
+
 
   void _createPolylines() {
     List<dynamic> coordinatesListDynamic = widget.routeData['route'];
@@ -71,9 +82,17 @@ class _RoutePageState extends State<RoutePage> {
 
   @override
   Widget build(BuildContext context) {
+
     Timestamp timestamp = widget.routeData['timestamp'] as Timestamp;
     DateTime dateTime = timestamp.toDate();
     String formattedDateTime = DateFormat('yyy/MM/dd HH:mm').format(dateTime);
+
+    Map<String, dynamic> data = widget.routeData['successfulMissions'];
+    Map<String, List<dynamic>> successfulMissions = {};
+
+    data.forEach((key, value) {
+      successfulMissions[key] = value.cast<dynamic>();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -109,11 +128,11 @@ class _RoutePageState extends State<RoutePage> {
                 target: polylineCoordinates.isNotEmpty
                     ? polylineCoordinates.first
                     : LatLng(0, 0),
-                zoom: 15,
+                zoom: 14,
               ),
               polylines: _polylines,
               markers: _markers,
-              myLocationEnabled: true,
+              myLocationEnabled: false,
               zoomControlsEnabled: false,
             ),
           ),
@@ -205,7 +224,7 @@ class _RoutePageState extends State<RoutePage> {
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(5),
                     child: Text(
-                      '990', // 원하는 두 번째 텍스트로 변경
+                      '${widget.routeData['caloriesBurned']}', // 원하는 두 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -226,18 +245,30 @@ class _RoutePageState extends State<RoutePage> {
             ],
           ),
           SizedBox(height: 20),
+          Center( // "성공한 미션"을 Center 위젯으로 감싸서 중앙 정렬
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: Text(
+                '성공한 미션',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Column(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(10),
                     alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
                     child: Text(
-                      '성공한 미션', // 원하는 첫 번째 텍스트로 변경
+                      '거리', // 원하는 두 번째 텍스트로 변경
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -245,9 +276,59 @@ class _RoutePageState extends State<RoutePage> {
                   Container(
                     alignment: Alignment.center,
                     child: Text(
-                      '여기에 작업', // 원하는 두 번째 텍스트로 변경
+                      successfulMissions['거리']!.first,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '시간', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      successfulMissions['시간']!.join(','),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5),
+                    child: Text(
+                      '페이스', // 원하는 두 번째 텍스트로 변경
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      successfulMissions['페이스']!.join(','),
+                      style: TextStyle(
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -256,6 +337,7 @@ class _RoutePageState extends State<RoutePage> {
               ),
             ],
           ),
+          // 여기에 추가적인 위젯을 배치할 수 있습니다.
         ],
       ),
     );
@@ -266,4 +348,6 @@ class _RoutePageState extends State<RoutePage> {
     _mapController.dispose();
     super.dispose();
   }
+
 }
+

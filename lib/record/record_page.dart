@@ -10,16 +10,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
 import 'package:irun/option/tts_setting_page.dart';
+import 'package:irun/record/firestore_service.dart';
+import 'package:irun/record/stop_record_page.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
-
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
-
   final User? user = auth.currentUser;
 
   GoogleMapController? _controller;
@@ -41,11 +41,88 @@ class _MapScreenState extends State<MapScreen> {
 
   LatLng? currentPosition;
 
+  bool isrunningflag = false;
+
   @override
   void initState() {
     super.initState();
     _initTTS();
     _getCurrentLocationAndStartRecording();
+    isrunningflag = true;
+  }
+
+  Future<void> _pauseRecording() async {
+    setState(() {
+      isrunningflag = false; // 러닝 재개
+    });
+
+
+    _stopwatch.stop();
+    _positionStreamSubscription?.pause();
+    _timer?.cancel();
+
+    // 경로 데이터 생성
+    List<Map<String, double>> routeData = _markers.map((marker) {
+      return {
+        'latitude': marker.position.latitude,
+        'longitude': marker.position.longitude,
+      };
+    }).toList();
+
+    // StopMapScreen으로 경로 데이터 전달
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StopMapScreen(
+          formattedTime: _formatTime(_stopwatch.elapsedMilliseconds),
+          pace: _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds),
+          routeData: routeData, // 경로 데이터 전달
+          currentLocation : _currentLocation,
+          markers: _markers,
+          stopwatch: _stopwatch,
+          totalDistance: _totalDistance,
+          isRunning: isrunningflag,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      resumeRunning();
+    }
+  }
+
+  void resumeRunning() {
+    setState(() {
+      isrunningflag = true;
+      _resumeRecording();
+    });
+  }
+
+  void _resumeRecording() {
+    _stopwatch.start();
+
+    var locationSettings =
+    LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+
+    if (_positionStreamSubscription == null) {
+      _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
+          .listen((Position position) {
+        _updateCameraPosition(position);
+        if (isrunningflag) {
+          _updatePolyline(position);
+        }
+      });
+    } else {
+      _positionStreamSubscription?.resume();
+    }
+
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      setState(() {}); // 매 초마다 화면을 새로 고침
+    });
   }
 
    Future<void> _initTTS() async {
@@ -63,14 +140,16 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _getCurrentLocationAndStartRecording() async {
-    Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position locationData = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       _currentLocation = locationData;
       _updateCameraPosition(_currentLocation!);
       _markers.add(
         Marker(
           markerId: MarkerId('startLocation'),
-          position: LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
+          position:
+          LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
           infoWindow: InfoWindow(title: 'Start Location'),
           visible: false,
         ),
@@ -81,64 +160,105 @@ class _MapScreenState extends State<MapScreen> {
 
   void _startRecording() {
     _stopwatch.start();
-    var locationSettings = LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+    var locationSettings =
+    LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
 
-    _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-            (Position position) {
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position position) {
           _updateCameraPosition(position);
           _updatePolyline(position);
-        }
-    );
+        });
 
     _timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
       setState(() {}); // This will trigger a rebuild every second
     });
   }
 
-  void _stopRecording() {
+  void _stopRecording() async {
     _stopwatch.stop();
     _positionStreamSubscription?.cancel();
     _timer?.cancel();
-    _uploadDataToFirestore();
+
+    //칼로리 저장
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    double? height;
+    double? weight;
+    int? age;
+    bool gender = true;
+
+
+    // 정보 가져오기
+    DocumentSnapshot userInfoSnapshot = await firestore
+        .collection("Users")
+        .doc(user!.uid)
+        .get();
+
+    if (userInfoSnapshot.exists) {
+      height = userInfoSnapshot['height'];
+      weight = userInfoSnapshot['weight'];
+      age = userInfoSnapshot['age'];
+      gender = userInfoSnapshot['gender'];
+    }
+
+
+    double caloriesBurned = calculateCalories(weight!, height!, age!, gender, _totalDistance / 1000); // m를 km로 변환
+
+    // FirestoreService를 사용하여 데이터 저장
+    final missionData = Provider.of<MissionData>(context, listen: false);
+
+    await FirestoreService.uploadDataToFirestore(
+    user: user!,
+    currentLocation: _currentLocation!,
+    markers: _markers,
+    stopwatch: _stopwatch,
+    totalDistance: _totalDistance,
+    missionData: missionData,
+    caloriesBurned: caloriesBurned,
+    );
+
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   void _updatePolyline(Position position) {
-
-    setState(() {
-      _markers.add(
-        Marker(
-          markerId: MarkerId('point${_markers.length}'),
-          position: LatLng(position.latitude, position.longitude),
-          visible: false,
-        ),
-      );
-
-      if (_markers.length >= 2) {
-        LatLng lastPosition = _markers[_markers.length - 2].position;
-        LatLng currentPosition = _markers[_markers.length - 1].position;
-        double distance = _calculateDistance(
-          lastPosition.latitude,
-          lastPosition.longitude,
-          currentPosition.latitude,
-          currentPosition.longitude,
+    if (isrunningflag) {
+      setState(() {
+        _markers.add(
+          Marker(
+            markerId: MarkerId('point${_markers.length}'),
+            position: LatLng(position.latitude, position.longitude),
+            visible: false,
+          ),
         );
 
-        if (distance >= 0.1) {
-          _totalDistance += distance;
-
-          _polyline = Polyline(
-            polylineId: PolylineId("runningRoute"),
-            color: Colors.blue,
-            points: _markers.map((marker) => marker.position).toList(),
+        if (_markers.length >= 2) {
+          LatLng lastPosition = _markers[_markers.length - 2].position;
+          LatLng currentPosition = _markers[_markers.length - 1].position;
+          double distance = _calculateDistance(
+            lastPosition.latitude,
+            lastPosition.longitude,
+            currentPosition.latitude,
+            currentPosition.longitude,
           );
 
-          if (_totalDistance >= 1000 * (_markers.length - 1)) {
-            _speak('현재, ${(_totalDistance / 1000).toStringAsFixed(1)} 킬로미터 달렸습니다.');
+          if (distance >= 0.1) {
+            _totalDistance += distance;
+
+            _polyline = Polyline(
+              polylineId: PolylineId("runningRoute"),
+              color: Colors.blue,
+              points: _markers.map((marker) => marker.position).toList(),
+            );
+
+            if (_totalDistance >= 1000 * (_markers.length - 1)) {
+              _speak(
+                  '현재, ${(_totalDistance / 1000).toStringAsFixed(1)} 킬로미터 달렸습니다.');
+            }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   void _updateCameraPosition(Position position) {
@@ -150,12 +270,16 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  double _calculateDistance(double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
+  double _calculateDistance(double startLatitude, double startLongitude,
+      double endLatitude, double endLongitude) {
     const int earthRadius = 6371000;
     double latDiff = _degreesToRadians(endLatitude - startLatitude);
     double lonDiff = _degreesToRadians(endLongitude - startLongitude);
     double a = (sin(latDiff / 2) * sin(latDiff / 2)) +
-        (cos(_degreesToRadians(startLatitude)) * cos(_degreesToRadians(endLatitude)) * sin(lonDiff / 2) * sin(lonDiff / 2));
+        (cos(_degreesToRadians(startLatitude)) *
+            cos(_degreesToRadians(endLatitude)) *
+            sin(lonDiff / 2) *
+            sin(lonDiff / 2));
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double distance = earthRadius * c;
     return distance;
@@ -193,458 +317,33 @@ class _MapScreenState extends State<MapScreen> {
     return "$paceMinutes'$formattedSeconds''";
   }
 
-
-  void _uploadDataToFirestore() async {
-    final missionData = Provider.of<MissionData>(context, listen: false);
-
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    if (_currentLocation != null && _markers.isNotEmpty) {
-      String formattedTime = _formatTime(_stopwatch.elapsedMilliseconds);
-
-      String formattedDistance = (_totalDistance / 1000).toStringAsFixed(2);
-
-      String pace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
-
-      DateTime now = DateTime.now();
-      String timestamp = now.toIso8601String(); // ISO 8601 형식으로 변환
-
-      List<Map<String, double>> routePoints = _markers.map((marker) {
-        return {
-          'latitude': marker.position.latitude,
-          'longitude': marker.position.longitude
-        };
-      }).toList();
-
-      List<String> parts = formattedTime.split(':');
-
-      // 시(hour), 분(minute)을 각각 정수로 변환
-      int hours = int.parse(parts[0]);
-      int minutes = int.parse(parts[1]);
-
-      // 총 시간을 분으로 계산
-      int totalMinutes = hours * 60 + minutes;
-
-      String calculatedPace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
-
-      // 페이스 문자열을 분과 초로 분리
-      List<String> paceParts = calculatedPace.split("'");
-      int paceMinutes = int.parse(paceParts[0]); // 분
-      int paceSeconds = int.parse(paceParts[1].replaceAll("''", "")); // 초
-
-      RunData runData = RunData(
-        duration: formattedTime,
-        distance: formattedDistance,
-        timestamp: DateTime.now(),
-        routePoints: routePoints,
-        pace: pace,
-      );
-
-      // Run record 컬렉션에 저장
-      await firestore
-          .collection("Users")
-          .doc(user!.uid)
-          .collection("Run record")
-          .doc(timestamp)
-          .set(runData.toJson());
-
-      // Mission 컬렉션에 저장 (3km)
-      if (missionData.distance == '3km') {
-        String lottieFileName = "distance3";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (double.parse(formattedDistance) >= 3.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (double.parse(formattedDistance) >= 3.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //5km
-      if (missionData.distance == '5km') {
-        String lottieFileName = "distance5";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (double.parse(formattedDistance) >= 5.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (double.parse(formattedDistance) >= 5.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //10km
-      if (missionData.distance == '10km') {
-        String lottieFileName = "distance10";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (double.parse(formattedDistance) >= 10.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (double.parse(formattedDistance) >= 10.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //time15
-      if (missionData.time == '15분') {
-        String lottieFileName = "time15";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (totalMinutes >= 15.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (totalMinutes >= 10.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //time30
-      if (missionData.time == '30분') {
-        String lottieFileName = "time30";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (totalMinutes >= 30.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (totalMinutes >= 30.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //time60
-      if (missionData.time == '1시간') {
-        String lottieFileName = "time60";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (totalMinutes >= 60.0) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (totalMinutes >= 60.0) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //pace 630
-      if (missionData.pace == '630') {
-        String lottieFileName = "pace630";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds <= 30)) ? 1 : 0;
-          state = "bronze";
-        }
-
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //pace 600
-      if (missionData.pace == '600') {
-        String lottieFileName = "pace600";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (paceMinutes < 6 || (paceMinutes == 6 && paceSeconds == 0)) ? 1 : 0;
-          state = "bronze";
-        }
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
-
-      //pace 550
-      if (missionData.pace == '550') {
-        String lottieFileName = "pace550";
-        String state;
-        int num;
-
-        DocumentSnapshot snapshot = await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .get();
-
-        if (snapshot.exists) {
-          var data = snapshot.data() as Map<String, dynamic>;
-          num = data['num'] ?? 0;
-          state = data['state'] ?? "bronze";
-
-          if (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) {
-            num++;
-          }
-
-          if (num >= 10 && state != "gold") {
-            num = 0;
-            if (state == "bronze") {
-              state = "silver";
-            } else if (state == "silver") {
-              state = "gold";
-            }
-          }
-        } else {
-          num = (paceMinutes < 5 || (paceMinutes == 5 && paceSeconds == 50)) ? 1 : 0;
-          state = "bronze";
-        }
-
-
-        await firestore
-            .collection("Users")
-            .doc(user!.uid)
-            .collection("Mission")
-            .doc(lottieFileName)
-            .update({'num': num, 'state': state});
-      }
+  double calculateBMR(double weight, double height, int age, bool isMale) {
+    if (isMale) {
+      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+    } else {
+      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
     }
+  }
+
+  double calculateCalories(double weight, double height, int age, bool isMale, double distance) {
+    double bmr = calculateBMR(weight, height, age, isMale);
+    // 활동 계수 1.55는 중간 정도의 활동을 가정
+    double tdee = bmr * 1.55;
+
+    // 러닝으로 인한 추가 칼로리 소모
+    const double runningFactor = 1.036;
+    double runningCalories = distance * weight * runningFactor;
+
+    return tdee / 24 + runningCalories; // 하루 칼로리를 시간으로 나누고 러닝 칼로리를 추가
   }
 
   @override
   Widget build(BuildContext context) {
     String formattedTime = _formatTime(_stopwatch.elapsedMilliseconds);
-    // 미터 단위의 거리를 킬로미터 단위로 변환하고, 소수점 둘째 자리까지 표시
-    String formattedDistance = (_totalDistance / 1000).toStringAsFixed(2) + ' km';
-    String pace = _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
+    String formattedDistance =
+        _totalDistance.toStringAsFixed(0) + ' m';
+    String pace =
+    _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
 
     return Scaffold(
       appBar: AppBar(
@@ -652,48 +351,46 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Column(
         children: [
-          Container(
-            height: 120, // 컨테이너 높이 조정
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Time: $formattedTime'),
-                SizedBox(height: 4.0),
-                Text('Distance: $formattedDistance'), // 수정된 거리 표시
-                SizedBox(height: 4.0),
-                Text('Pace: $pace'), // 페이스 표시
-              ],
-            ),
-          ),
           Expanded(
-            child: GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
-                  controller.setMapStyle(mapStyle);
-                  _controller = controller;
-                });
-              },
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  _currentLocation?.latitude ?? 0.0,
-                  _currentLocation?.longitude ?? 0.0,
-                ),
-                zoom: 17.0,
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Time: $formattedTime',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Distance: $formattedDistance',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Pace: $pace',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              markers: Set.from(_markers),
-              polylines: Set.from([_polyline]),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
             ),
           ),
-          Container(
-            height: 110,
+          Padding(
             padding: EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _stopRecording,
-              child: Text('Stop Recording'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: _pauseRecording,
+                  icon: Icon(Icons.pause),
+                  iconSize: 50,
+                ),
+                IconButton(
+                  onPressed: _stopRecording,
+                  icon: Icon(Icons.stop),
+                  iconSize: 50,
+                ),
+              ],
             ),
           ),
         ],
@@ -708,30 +405,4 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
-}
-
-class RunData {
-  final String duration;
-  final String distance;
-  final DateTime timestamp;
-  final String pace;
-  final List<Map<String, double>> routePoints;
-
-  RunData({
-    required this.duration,
-    required this.distance,
-    required this.pace,
-    required this.timestamp,
-    required this.routePoints,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'duration': duration,
-      'distance': distance,
-      'timestamp': timestamp,
-      'route': routePoints,
-      'pace' : pace,
-    };
-  }
 }
