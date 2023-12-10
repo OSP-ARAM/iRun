@@ -94,18 +94,18 @@ class _MyHomePageState extends State<MyHomePage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("위치 권한 필요"),
+          title: const Text("위치 권한 필요"),
           content:
-              Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
+              const Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
           actions: <Widget>[
             TextButton(
-              child: Text("앱 종료"),
+              child: const Text("앱 종료"),
               onPressed: () {
                 SystemNavigator.pop(); // 앱을 종료합니다
               },
             ),
             TextButton(
-              child: Text("설정으로 이동"),
+              child: const Text("설정으로 이동"),
               onPressed: () {
                 Navigator.of(context).pop();
                 SystemNavigator.pop(); // 앱을 종료합니다
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _startLocationTracking() {
-    var locationSettings = LocationSettings(
+    var locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 1,
     );
@@ -154,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.yellow, // AppBar 배경색 설정
-          title: TabBar(
+          title: const TabBar(
             indicatorColor: Colors.red,
             labelStyle: TextStyle(
               color: Colors.white,
@@ -186,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                   initialCameraPosition: CameraPosition(
-                    target: currentLocation ?? LatLng(36.1433405, 128.393805),
+                    target: currentLocation ?? const LatLng(36.1433405, 128.393805),
                     // 금오공대 좌표를 기본값으로 설정
                     // 기본값 또는 원하는 다른 위치의 좌표로 설정
                     zoom: 16.0,
@@ -196,20 +196,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   zoomControlsEnabled: false,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(
+                  padding: const EdgeInsets.only(
                     left: 15,
                     top: 15,
                   ),
                   child: ClipOval(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
                       height: 80,
                       width: 80,
                       // 흰색 배경 설정
-                      padding: EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(0),
                       // 동그라미 내부 여백 설정
                       child: Column(
                         children: [
@@ -219,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: 50,
                             fit: BoxFit.fill,
                           ),
-                          SizedBox(width: 10), // 아이콘과 온도 사이 여백 조절
+                          const SizedBox(width: 10), // 아이콘과 온도 사이 여백 조절
                           Text(
                             "${_weather?.temperature.round()}℃",
                           ),
@@ -253,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                     width: 50.0,
                     height: 50.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.grey,
                       shape: BoxShape.circle,
                     ),
@@ -261,14 +261,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         Navigator.pushNamed(context, '/option');
                       },
-                      icon: Icon(Icons.settings),
+                      icon: const Icon(Icons.settings),
                       iconSize: 30,
                       color: Colors.white,
                     ),
                   ),
                 ),
                 // 작은 원 2
-                Positioned(
+                const Positioned(
                   left: 180,
                   bottom: 50,
                   child: SizedBox(
@@ -284,7 +284,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                     width: 50.0,
                     height: 50.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.grey,
                       shape: BoxShape.circle,
                     ),
@@ -292,7 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         Navigator.pushNamed(context, '/music');
                       },
-                      icon: Icon(Icons.music_note),
+                      icon: const Icon(Icons.music_note),
                       iconSize: 30,
                       color: Colors.white,
                     ),
@@ -305,23 +305,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            Container(
-              // 두 번째 탭의 내용
-              child: Center(
-                child: LogPage(),
-              ),
+            const Center(
+              child: LogPage(),
             ),
-            Container(
-              // 두 번째 탭의 내용
-              child: Center(
-                child: RankingPage(),
-              ),
+            Center(
+              child: RankingPage(),
             ),
-            Container(
-              // 두 번째 탭의 내용
-              child: Center(
-                child: AchievementsPage(),
-              ),
+            const Center(
+              child: AchievementsPage(),
             ),
           ],
         ),
@@ -337,26 +328,28 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class SelectedMissionsWidget extends StatelessWidget {
+  const SelectedMissionsWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     final missionData = Provider.of<MissionData>(context);
 
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('선택된 미션',
+          const Text('선택된 미션',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           if (missionData.time != null)
             Text('시간: ${missionData.time}',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           if (missionData.distance != null)
             Text('거리: ${missionData.distance}',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           if (missionData.pace != null)
             Text('페이스: ${missionData.pace}',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -22,7 +22,7 @@ void main() async {
   );
   runApp(ChangeNotifierProvider(
     create: (context) => MissionData(),
-    child: MyApp(),
+    child: const MyApp(),
   ));
   _startBackgroundTask();
 }
@@ -55,13 +55,13 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/' : (context) => LoginPage(),
-        '/home' : (context) => MyHomePage(),
-        '/music' : (context) => MusicPage(),
+        '/home' : (context) => const MyHomePage(),
+        '/music' : (context) => const MusicPage(),
         '/ranking' : (context) => RankingPage(),
-        '/option' : (context) => OptionPage(),
+        '/option' : (context) => const OptionPage(),
         '/record' : (context) => MapScreen(),
-        '/log' : (context) => LogPage(),
-        '/Achievements' : (context) => AchievementsPage(),
+        '/log' : (context) => const LogPage(),
+        '/Achievements' : (context) => const AchievementsPage(),
         '/body' : (context) => BodyMeasurementPage()
       },
       initialRoute: '/',

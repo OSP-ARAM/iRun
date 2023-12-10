@@ -22,14 +22,14 @@ class LogPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 // 사용자의 'Run record' 컬렉션에서 모든 문서를 불러옵니다.
@@ -40,15 +40,15 @@ class LogPage extends StatelessWidget {
                     .orderBy('timestamp', descending: true).snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
-                    return Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
+                    return const Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('아직 기록된 데이터가 없습니다.'));
+                    return const Center(child: Text('아직 기록된 데이터가 없습니다.'));
                   }
 
                   return ListView(
@@ -67,11 +67,11 @@ class LogPage extends StatelessWidget {
                             Text('시간: ${data['duration']}'),
                             TextButton(
                               onPressed: () => _viewRoute(context, data),
-                              child: Text('루트 보기'),
+                              child: const Text('루트 보기'),
                             ),
                           ],
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                         isThreeLine: true,
                       );
                     }).toList(),

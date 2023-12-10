@@ -66,7 +66,7 @@ class OptionPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TTSSetting()),
+                MaterialPageRoute(builder: (context) => const TTSSetting()),
               );
             },
           ),

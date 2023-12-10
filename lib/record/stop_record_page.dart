@@ -41,8 +41,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
   final User? user = auth.currentUser;
 
   GoogleMapController? _controller;
-  List<Marker> _markers = [];
-  Stopwatch _stopwatch = Stopwatch();
+  final List<Marker> _markers = [];
+  final Stopwatch _stopwatch = Stopwatch();
   StreamSubscription<Position>? _positionStreamSubscription;
 
   FlutterTts tts = FlutterTts();
@@ -162,121 +162,126 @@ class _StopMapScreenState extends State<StopMapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Running'),
+        title: const Text('Running'),
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 120, // 컨테이너 높이 조정
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Time, Distance, Pace, Calories를 각각 Row로 표시
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: LayoutBuilder(
+
+        builder: (BuildContext context, BoxConstraints constraints) {
+          double height = MediaQuery.of(context).size.height * 1;
+          return Column(
+          children: [
+            Container(
+                height: height * 0.2, // 컨테이너 높이 조정
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      '시간: ${widget.formattedTime}',
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    // Time, Distance, Pace, Calories를 각각 Row로 표시
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          '시간: ${widget.formattedTime}',
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '거리: $formattedDistance km',
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '거리: $formattedDistance km',
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          '페이스: ${widget.pace}',
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '칼로리: ${caloriesBurned.toStringAsFixed(1)} kcal',
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ],
+                )
+            ),
+            SizedBox(
+              height: height*0.5,
+              child: GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  rootBundle
+                      .loadString('assets/map/mapstyle.json')
+                      .then((String mapStyle) {
+                    controller.setMapStyle(mapStyle);
+                    _controller = controller;
+
+                    // 경로의 초기 확대 수준 설정
+                    double initialZoom = _calculateZoomLevel(widget.routeData);
+
+                    controller.moveCamera(
+                      CameraUpdate.newLatLngZoom(
+                        LatLng(
+                          widget.routeData.last['latitude']!,
+                          widget.routeData.last['longitude']!,
+                        ),
+                        initialZoom,
+                      ),
+                    );
+                  });
+                },
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                    widget.routeData.last['latitude']!,
+                    widget.routeData.last['longitude']!,
+                  ),
+                  zoom: 18.0, // 초기 확대 수준 설정
                 ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      '페이스: ${widget.pace}',
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '칼로리: ${caloriesBurned.toStringAsFixed(1)} kcal',
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                markers: Set.from(_markers),
+                polylines: Set.from([
+                  Polyline(
+                    polylineId: const PolylineId("runningRoute"),
+                    color: Colors.blue,
+                    points: widget.routeData
+                        .map((data) =>
+                        LatLng(data['latitude']!, data['longitude']!))
+                        .toList(),
+                  ),
+                ]),
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  height: height*0.15,
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: const Text('재개'),
+                  ),
+                ), // 버튼 사이 간격 조절을 위한 SizedBox 사용
+                Container(
+                  height: height*0.15,
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _stopRecording();
+                    },
+                    child: const Text('종료'),
+                  ),
                 ),
               ],
-            )
-          ),
-          SizedBox(
-            height: 450,
-            child: GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                rootBundle
-                    .loadString('assets/map/mapstyle.json')
-                    .then((String mapStyle) {
-                  controller.setMapStyle(mapStyle);
-                  _controller = controller;
-
-                  // 경로의 초기 확대 수준 설정
-                  double initialZoom = _calculateZoomLevel(widget.routeData);
-
-                  controller.moveCamera(
-                    CameraUpdate.newLatLngZoom(
-                      LatLng(
-                        widget.routeData.last['latitude']!,
-                        widget.routeData.last['longitude']!,
-                      ),
-                      initialZoom,
-                    ),
-                  );
-                });
-              },
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  widget.routeData.last['latitude']!,
-                  widget.routeData.last['longitude']!,
-                ),
-                zoom: 18.0, // 초기 확대 수준 설정
-              ),
-              markers: Set.from(_markers),
-              polylines: Set.from([
-                Polyline(
-                  polylineId: PolylineId("runningRoute"),
-                  color: Colors.blue,
-                  points: widget.routeData
-                      .map((data) =>
-                      LatLng(data['latitude']!, data['longitude']!))
-                      .toList(),
-                ),
-              ]),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
             ),
-          ),
-          SizedBox(width: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                height: 110,
-                padding: EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text('재개'),
-                ),
-              ), // 버튼 사이 간격 조절을 위한 SizedBox 사용
-              Container(
-                height: 110,
-                padding: EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    _stopRecording();
-                  },
-                  child: Text('종료'),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ); }
       ),
     );
   }
