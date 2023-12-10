@@ -9,16 +9,16 @@ class CustomIconButton extends StatefulWidget {
 }
 
 class _CustomIconButtonState extends State<CustomIconButton> {
-  IconData selectedIcon = Icons.add; // 기본 아이콘은 +로 설정
+  IconData selectedIcon = Icons.star; // 기본 아이콘은 +로 설정
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        final icon = await CustomIconPicker.show(context);
-        if (icon != null) {
+        final result = await CustomIconPicker.show(context);
+        if (result != null && result.containsKey('시간')) { // 예를 들어 '시간' 카테고리 선택
           setState(() {
-            selectedIcon = icon;
+            selectedIcon = Icons.star; // 선택된 아이콘으로 업데이트
           });
         }
       },
@@ -27,7 +27,7 @@ class _CustomIconButtonState extends State<CustomIconButton> {
       child: Container(
         width: 50.0,
         height: 50.0,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.grey,
           shape: BoxShape.circle,
         ),

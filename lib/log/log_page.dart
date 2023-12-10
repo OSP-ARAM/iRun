@@ -1,47 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:irun/navi/navi.dart';
 import 'package:intl/intl.dart';
+import 'package:irun/log/RoutePage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:irun/login/login_api.dart';
 
 class LogPage extends StatelessWidget {
   const LogPage({Key? key}) : super(key: key);
 
+  void _viewRoute(BuildContext context, Map<String, dynamic> routeData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RoutePage(routeData: routeData)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 현재 로그인한 사용자의 UID를 가져옵니다.
+    final User? user = auth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('기록 페이지'),
+        title: const Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              '당신의 러닝 기록',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('running_records').snapshots(),
+                // 사용자의 'Run record' 컬렉션에서 모든 문서를 불러옵니다.
+                stream: FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(user!.uid)
+                    .collection("Run record")
+                    .orderBy('timestamp', descending: true).snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
-                    return Center(
-                      child: Text('데이터를 불러오는 중 오류가 발생했습니다.'),
-                    );
+                    return const Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text('아직 기록된 데이터가 없습니다.'),
-                    );
+                    return const Center(child: Text('아직 기록된 데이터가 없습니다.'));
                   }
 
                   return ListView(
@@ -49,19 +56,22 @@ class LogPage extends StatelessWidget {
                       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
                       Timestamp timestamp = data['timestamp'] as Timestamp;
                       DateTime dateTime = timestamp.toDate();
-
-                      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
 
                       return ListTile(
-                        title: Text('Date: $formattedDate'),
+                        title: Text('날짜: $formattedDate'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Distance: ${data['distance']} meters'),
-                            Text('Duration: ${data['duration']}'),
+                            Text('거리: ${data['distance']} km'),
+                            Text('시간: ${data['duration']}'),
+                            TextButton(
+                              onPressed: () => _viewRoute(context, data),
+                              child: const Text('루트 보기'),
+                            ),
                           ],
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                         isThreeLine: true,
                       );
                     }).toList(),
@@ -72,7 +82,6 @@ class LogPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: MenuBottom(currentIndex: 0),
     );
   }
 }

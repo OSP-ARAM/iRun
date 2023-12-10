@@ -32,7 +32,7 @@ class _MenuBottomState extends State<MenuBottom> {
               Navigator.pushNamed(context, '/log');
               break;
             case 1:
-              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+              Navigator.pushNamed(context, '/ranking');
               break;
             case 2:
               Navigator.pushNamed(context, '/Achievements');
@@ -47,8 +47,8 @@ class _MenuBottomState extends State<MenuBottom> {
           label: '기록',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: '홈',
+          icon: Icon(Icons.leaderboard),
+          label: '랭킹',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.star),
