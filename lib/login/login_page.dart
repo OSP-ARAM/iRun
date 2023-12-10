@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void navigateAfterLogin(BuildContext context, User user) {
     FirebaseFirestore.instance.collection('Users').doc(user.uid).get().then((doc) {
       final data = doc.data();
-      if (data != null && data.containsKey('height') && data.containsKey('weight')) {
+      if (data != null && data.containsKey('height') && data.containsKey('weight') && data.containsKey('age') && data.containsKey('gender')) {
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
         Navigator.pushNamedAndRemoveUntil(context, '/body', (route) => false);
