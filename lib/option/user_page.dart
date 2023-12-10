@@ -21,6 +21,10 @@ class _UserPageState extends State<UserPage> {
 
   double weight = 0.0;
 
+  int age = 0;
+
+  bool gender = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,11 +36,14 @@ class _UserPageState extends State<UserPage> {
   Future<void> getUserData(String uid) async {
     DocumentSnapshot userSnapshot =
     await firestore.collection('Users').doc(uid).get();
-    Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>? ?? {};
+    Map<String, dynamic> userData =
+        userSnapshot.data() as Map<String, dynamic>? ?? {};
 
     setState(() {
       height = (userData['height'] as num).toDouble();
       weight = (userData['weight'] as num).toDouble();
+      age = (userData['age'] as num).toInt();
+      gender = userData['gender'];
     });
   }
 
@@ -69,6 +76,78 @@ class _UserPageState extends State<UserPage> {
                   ),
                 ],
               ),
+            ),
+            Divider(
+              height: 30,
+              indent: 30,
+              endIndent: 30,
+              color: Colors.grey[800],
+            ),
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(
+                    left: 40,
+                    bottom: 5,
+                  ),
+                  child: Text(
+                    '나이:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 40,
+                    bottom: 10,
+                  ),
+                  child: Text(
+                    '$age',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Divider(
+              height: 30,
+              indent: 30,
+              endIndent: 30,
+              color: Colors.grey[800],
+            ),
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(
+                    left: 40,
+                    bottom: 5,
+                  ),
+                  child: Text(
+                    '성별:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 40,
+                    bottom: 10,
+                  ),
+                  child: Text(
+                    gender ? '남자' : '여자',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
             Divider(
               height: 30,

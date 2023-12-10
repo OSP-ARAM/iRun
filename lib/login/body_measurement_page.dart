@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class BodyMeasurementPage extends StatefulWidget {
   @override
@@ -10,6 +11,8 @@ class BodyMeasurementPage extends StatefulWidget {
 class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  bool _isMale = true;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,43 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
                 labelText: '몸무게 (kg)',
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 8),
+            TextField(
+              controller: _ageController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '나이',
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    IconData(0xe3c5, fontFamily: 'MaterialIcons'),
+                    color: _isMale == true ? Colors.blue : Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isMale = true;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    IconData(0xe261, fontFamily: 'MaterialIcons'),
+                    color: _isMale == false ? Colors.pink : Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isMale = false;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
             ElevatedButton(
               onPressed: () async {
                 bool success = await saveBodyMeasurements();
@@ -55,8 +94,10 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
   Future<bool> saveBodyMeasurements() async {
     final String heightStr = _heightController.text;
     final String weightStr = _weightController.text;
+    final String ageStr = _ageController.text;
+    final bool gender = _isMale;
 
-    if (heightStr.isEmpty || weightStr.isEmpty) {
+    if (heightStr.isEmpty || weightStr.isEmpty || ageStr.isEmpty) {
       _showErrorDialog('모든 필드를 채워주세요.');
       return false;
     }
@@ -64,9 +105,10 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
     try {
       final double height = double.parse(heightStr);
       final double weight = double.parse(weightStr);
+      final int age = int.parse(ageStr);
 
-      if (height <= 0 || weight <= 0) {
-        _showErrorDialog('키와 몸무게는 양의 숫자여야 합니다.');
+      if (height <= 0 || weight <= 0 || age <= 0) {
+        _showErrorDialog('음의 정수, 0은 입력할 수 없습니다');
         return false;
       }
 
@@ -76,11 +118,13 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
         await FirebaseFirestore.instance.collection('Users').doc(userId).update({
           'height': height,
           'weight': weight,
+          'age': age,
+          'gender': gender,
         });
         return true;
       }
     } catch (e) {
-      _showErrorDialog('키와 몸무게를 올바른 숫자로 입력해주세요.');
+      _showErrorDialog('올바른 숫자로 입력해주세요.');
       return false;
     }
     return false;
