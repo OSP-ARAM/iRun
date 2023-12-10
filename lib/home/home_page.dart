@@ -16,6 +16,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:irun/mission/mission_page.dart';
 
+import 'package:permission_handler/permission_handler.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -71,8 +73,48 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _initCurrentLocationAndTracking();
+    _checkPermission();
     _fetchWeather();
+  }
+
+  Future<void> _checkPermission() async {
+    var status = await Permission.location.status;
+    if (status.isGranted) {
+      _initCurrentLocationAndTracking();
+    } else if (status.isDenied) {
+      _showPermissionDialog();
+    } else if (status.isPermanentlyDenied) {
+      _showPermissionDialog();
+    }
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("위치 권한 필요"),
+          content: Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("앱 종료"),
+              onPressed: () {
+                SystemNavigator.pop(); // 앱을 종료합니다
+              },
+            ),
+            TextButton(
+              child: Text("설정으로 이동"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                SystemNavigator.pop(); // 앱을 종료합니다
+                openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _initCurrentLocationAndTracking() async {
@@ -296,121 +338,11 @@ class SelectedMissionsWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('선택된 미션', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          if (missionData.time != null) Text('시간: ${missionData.time}'),
-          if (missionData.distance != null) Text('거리: ${missionData.distance}'),
-          if (missionData.pace != null) Text('페이스: ${missionData.pace}'),
+          if (missionData.time != null) Text('시간: ${missionData.time}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.distance != null) Text('거리: ${missionData.distance}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.pace != null) Text('페이스: ${missionData.pace}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 }
-
-// Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           'iRun',
-//           style: TextStyle(
-//             color: Colors.black,
-//             fontWeight: FontWeight.bold,
-//             fontSize: 25.0,
-//           ),
-//         ),
-//       ),
-//       body: Stack(
-//         children: [
-//           // GoogleMap 위젯 추가
-//           GoogleMap(
-//             onMapCreated: _onMapCreated,
-//             initialCameraPosition: CameraPosition(
-//               target: currentLocation ?? LatLng(36.1433405, 128.393805),
-//               // 서울의 좌표를 기본값으로 설정
-//               // 기본값 또는 원하는 다른 위치의 좌표로 설정
-//               zoom: 16.0,
-//             ),
-//           ),
-//           Padding(
-//             padding: EdgeInsets.only(
-//               left: 30,
-//               top: 30,
-//             ),
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 // Text(_weather?.cityName ?? "loading city..."),
-//                 Lottie.asset(
-//                   getWeatherAnimation(_weather?.mainCondition),
-//                   width: 50,
-//                   height: 50,
-//                   fit: BoxFit.fill,
-//                 ),
-//                 Text(
-//                   "${_weather?.temperature.round()}℃",
-//                 ),
-//                 // Text(_weather?.mainCondition ?? "")
-//               ],
-//             ),
-//           ),
-//           // 기존의 UI 요소들
-//           Positioned(
-//             bottom: 50,
-//             left: 80,
-//             child: GestureDetector(
-//               onTap: () {
-//                 Navigator.pushNamedAndRemoveUntil(
-//                     context, '/record', (route) => false);
-//               },
-//               child: Lottie.asset(
-//                 'images/start.json',
-//                 width: 250.0,
-//                 height: 250.0,
-//                 fit: BoxFit.fill,
-//               ),
-//             ),
-//           ),
-//
-//           // 작은 원 1
-//           Positioned(
-//             left: 100,
-//             bottom: 80,
-//             child: Container(
-//               width: 50.0,
-//               height: 50.0,
-//               decoration: BoxDecoration(
-//                 color: Colors.grey,
-//                 shape: BoxShape.circle,
-//               ),
-//               child: IconButton(
-//                 onPressed: () {
-//                   Navigator.pushNamed(context, '/option');
-//                 },
-//                 icon: Icon(Icons.settings),
-//                 iconSize: 30,
-//                 color: Colors.white,
-//               ),
-//             ),
-//           ),
-//           // 작은 원 2
-//           Positioned(
-//             left: 180,
-//             bottom: 50,
-//             child: SizedBox(
-//               width: 50.0,
-//               height: 50.0,
-//               child: CustomIconButton(),
-//             ),
-//           ),
-//           // 작은 원 3
-//           Positioned(
-//             left: 260,
-//             bottom: 80,
-//             child: SizedBox(
-//               width: 50.0,
-//               height: 50.0,
-//               child: CustomIconButton(),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

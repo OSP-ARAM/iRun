@@ -7,6 +7,7 @@ import 'package:irun/mission/mission_page.dart';
 import 'package:irun/music/music_page.dart';
 import 'package:irun/option/option_page.dart';
 import 'package:irun/ranking/ranking_page.dart';
+import 'package:irun/record/stop_record_page.dart';
 import 'firebase_options.dart';
 import 'package:irun/record/record_page.dart';
 import 'package:irun/login/body_measurement_page.dart';
@@ -62,7 +63,6 @@ class MyApp extends StatelessWidget {
         '/log' : (context) => LogPage(),
         '/Achievements' : (context) => AchievementsPage(),
         '/body' : (context) => BodyMeasurementPage()
-        //'/Achievements' : (context) => AwardTest()
       },
       initialRoute: '/',
     );
