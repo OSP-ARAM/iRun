@@ -27,7 +27,7 @@ class _CustomIconButtonState extends State<CustomIconButton> {
       child: Container(
         width: 50.0,
         height: 50.0,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.grey,
           shape: BoxShape.circle,
         ),

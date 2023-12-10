@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -23,15 +22,15 @@ class _MapScreenState extends State<MapScreen> {
   final User? user = auth.currentUser;
 
   GoogleMapController? _controller;
-  List<Marker> _markers = [];
-  Polyline _polyline = Polyline(
+  final List<Marker> _markers = [];
+  Polyline _polyline = const Polyline(
     polylineId: PolylineId("runningRoute"),
     color: Colors.blue,
     points: [],
   );
   Position? _currentLocation;
   double _totalDistance = 0.0;
-  Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
   StreamSubscription<Position>? _positionStreamSubscription;
 
   FlutterTts tts = FlutterTts();
@@ -102,7 +101,7 @@ class _MapScreenState extends State<MapScreen> {
     _stopwatch.start();
 
     var locationSettings =
-    LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+    const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
 
     if (_positionStreamSubscription == null) {
       _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -120,7 +119,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() {}); // 매 초마다 화면을 새로 고침
     });
   }
@@ -147,10 +146,10 @@ class _MapScreenState extends State<MapScreen> {
       _updateCameraPosition(_currentLocation!);
       _markers.add(
         Marker(
-          markerId: MarkerId('startLocation'),
+          markerId: const MarkerId('startLocation'),
           position:
           LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
-          infoWindow: InfoWindow(title: 'Start Location'),
+          infoWindow: const InfoWindow(title: 'Start Location'),
           visible: false,
         ),
       );
@@ -161,7 +160,7 @@ class _MapScreenState extends State<MapScreen> {
   void _startRecording() {
     _stopwatch.start();
     var locationSettings =
-    LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+    const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
 
     _positionStreamSubscription =
         Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -170,7 +169,7 @@ class _MapScreenState extends State<MapScreen> {
           _updatePolyline(position);
         });
 
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() {}); // This will trigger a rebuild every second
     });
   }
@@ -246,7 +245,7 @@ class _MapScreenState extends State<MapScreen> {
             _totalDistance += distance;
 
             _polyline = Polyline(
-              polylineId: PolylineId("runningRoute"),
+              polylineId: const PolylineId("runningRoute"),
               color: Colors.blue,
               points: _markers.map((marker) => marker.position).toList(),
             );
@@ -347,47 +346,47 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Running'),
+        title: const Text('Running'),
       ),
       body: Column(
         children: [
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Time: $formattedTime',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     'Distance: $formattedDistance',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     'Pace: $pace',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
                   onPressed: _pauseRecording,
-                  icon: Icon(Icons.pause),
+                  icon: const Icon(Icons.pause),
                   iconSize: 50,
                 ),
                 IconButton(
                   onPressed: _stopRecording,
-                  icon: Icon(Icons.stop),
+                  icon: const Icon(Icons.stop),
                   iconSize: 50,
                 ),
               ],

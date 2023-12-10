@@ -22,7 +22,7 @@ class MusicPage extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Music Player'),
         ),
-        body: AudioServiceWidget(child: const MusicPlayer()),
+        body: const AudioServiceWidget(child: MusicPlayer()),
       ),
     );
   }
@@ -127,7 +127,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onStart(Map<String, dynamic>? params) async {
-    var mediaItem = MediaItem(
+    var mediaItem = const MediaItem(
       id: 'asset:///assets/music/song1.ogg',
       album: 'Album name',
       title: 'Track title',

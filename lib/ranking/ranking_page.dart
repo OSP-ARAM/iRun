@@ -122,17 +122,17 @@ class _RankingPageState extends State<RankingPage> {
                         leading: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
+                            SizedBox(
                               width: 30,
-                              child: Text('${index + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                              child: Text('${index + 1}', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                             ),
-                            SizedBox(width: 20), // 숫자와 이미지 사이의 간격
+                            const SizedBox(width: 20), // 숫자와 이미지 사이의 간격
                             user['photoURL'] != null
                                 ? Image.network(user['photoURL'], width: 40, height: 40)
-                                : CircleAvatar(child: Icon(Icons.person)),
+                                : const CircleAvatar(child: Icon(Icons.person)),
                           ],
                         ),
-                        title: Text(user['displayName'] ?? 'No Name', style: TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(user['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text('총 거리 : ${user['totalDistance'].toStringAsFixed(2)} km'),
                       ),
                     );

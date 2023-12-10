@@ -48,21 +48,21 @@ class _RoutePageState extends State<RoutePage> {
 
     // 시작점과 종료점 마커 추가
     Marker startMarker = Marker(
-      markerId: MarkerId('start'),
+      markerId: const MarkerId('start'),
       position: polylineCoordinates.first,
-      infoWindow: InfoWindow(title: 'Start'),
+      infoWindow: const InfoWindow(title: 'Start'),
     );
 
     Marker endMarker = Marker(
-      markerId: MarkerId('end'),
+      markerId: const MarkerId('end'),
       position: polylineCoordinates.last,
-      infoWindow: InfoWindow(title: 'End'),
+      infoWindow: const InfoWindow(title: 'End'),
     );
 
     setState(() {
       _polylines.add(
         Polyline(
-          polylineId: PolylineId('route'),
+          polylineId: const PolylineId('route'),
           visible: true,
           points: polylineCoordinates,
           color: Colors.red,
@@ -118,24 +118,24 @@ class _RoutePageState extends State<RoutePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           '기록 상세',
         ),
       ),
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             alignment: Alignment.centerLeft,
             child: Text(
               '${formattedDateTime}', // 원하는 텍스트로 변경
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          Container(
+          SizedBox(
             height: 300,
             child: GoogleMap(
               onMapCreated: (GoogleMapController controller) {
@@ -149,7 +149,7 @@ class _RoutePageState extends State<RoutePage> {
               initialCameraPosition: CameraPosition(
                 target: polylineCoordinates.isNotEmpty
                     ? polylineCoordinates.first
-                    : LatLng(0, 0),
+                    : const LatLng(0, 0),
                 zoom: 14,
               ),
               polylines: _polylines,
@@ -158,7 +158,7 @@ class _RoutePageState extends State<RoutePage> {
               zoomControlsEnabled: false,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -166,10 +166,10 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     child: Text(
                       '${widget.routeData['duration'].substring(1)}', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
@@ -177,7 +177,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       '시간', // 원하는 첫 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 13,
@@ -190,10 +190,10 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     child: Text(
                       '${widget.routeData['pace']}', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
@@ -201,7 +201,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       '페이스', // 원하는 첫 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 14,
@@ -214,10 +214,10 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     child: Text(
                       '${widget.routeData['distance']}km', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
@@ -225,7 +225,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       '거리', // 원하는 첫 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 14,
@@ -236,7 +236,7 @@ class _RoutePageState extends State<RoutePage> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -244,10 +244,10 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     child: Text(
                       '${widget.routeData['caloriesBurned']}', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
@@ -255,7 +255,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       '칼로리', // 원하는 첫 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 14,
@@ -266,8 +266,8 @@ class _RoutePageState extends State<RoutePage> {
               ),
             ],
           ),
-          SizedBox(height: 20),
-          Center( // "성공한 미션"을 Center 위젯으로 감싸서 중앙 정렬
+          const SizedBox(height: 20),
+          const Center( // "성공한 미션"을 Center 위젯으로 감싸서 중앙 정렬
             child: Padding(
               padding: EdgeInsets.all(10),
               child: Text(
@@ -286,8 +286,8 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
-                    child: Text(
+                    padding: const EdgeInsets.all(5),
+                    child: const Text(
                       '거리', // 원하는 두 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 17,
@@ -299,7 +299,7 @@ class _RoutePageState extends State<RoutePage> {
                     alignment: Alignment.center,
                     child: Text(
                       '$success1',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -311,8 +311,8 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
-                    child: Text(
+                    padding: const EdgeInsets.all(5),
+                    child: const Text(
                       '시간', // 원하는 두 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 17,
@@ -324,7 +324,7 @@ class _RoutePageState extends State<RoutePage> {
                     alignment: Alignment.center,
                     child: Text(
                       '$success2',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -336,8 +336,8 @@ class _RoutePageState extends State<RoutePage> {
                 children: [
                   Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(5),
-                    child: Text(
+                    padding: const EdgeInsets.all(5),
+                    child: const Text(
                       '페이스', // 원하는 두 번째 텍스트로 변경
                       style: TextStyle(
                         fontSize: 17,
@@ -349,7 +349,7 @@ class _RoutePageState extends State<RoutePage> {
                     alignment: Alignment.center,
                     child: Text(
                       '$success3',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),

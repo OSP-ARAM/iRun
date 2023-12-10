@@ -18,42 +18,42 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('회원 정보 입력'),
+        title: const Text('회원 정보 입력'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
             TextField(
               controller: _heightController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
                 labelText: '키 (cm)',
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               controller: _weightController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
                 labelText: '몸무게 (kg)',
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               controller: _ageController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: '나이',
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
                   icon: Icon(
-                    IconData(0xe3c5, fontFamily: 'MaterialIcons'),
+                    const IconData(0xe3c5, fontFamily: 'MaterialIcons'),
                     color: _isMale == true ? Colors.blue : Colors.grey,
                   ),
                   onPressed: () {
@@ -64,7 +64,7 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
                 ),
                 IconButton(
                   icon: Icon(
-                    IconData(0xe261, fontFamily: 'MaterialIcons'),
+                    const IconData(0xe261, fontFamily: 'MaterialIcons'),
                     color: _isMale == false ? Colors.pink : Colors.grey,
                   ),
                   onPressed: () {
@@ -75,7 +75,7 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () async {
                 bool success = await saveBodyMeasurements();
@@ -83,7 +83,7 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
                   Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                 }
               },
-              child: Text('저장'),
+              child: const Text('저장'),
             ),
           ],
         ),
@@ -135,11 +135,11 @@ class _BodyMeasurementPageState extends State<BodyMeasurementPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('올바르지 않은 값'),
+          title: const Text('올바르지 않은 값'),
           content: Text(message),
           actions: <Widget>[
             TextButton(
-              child: Text('확인'),
+              child: const Text('확인'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

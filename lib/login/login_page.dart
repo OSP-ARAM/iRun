@@ -33,17 +33,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
     _logoAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     );
 
     _textAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: Offset(-1.0, 0.0),
-      end: Offset(0.0, 0.0),
+      begin: const Offset(-1.0, 0.0),
+      end: const Offset(0.0, 0.0),
     ).animate(CurvedAnimation(
       parent: _logoAnimationController!,
       curve: Curves.easeInOut,
@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff3e4784),
+                      backgroundColor: const Color(0xff3e4784),
                       padding: const EdgeInsets.all(16),
                     ),
                     child: Row(
