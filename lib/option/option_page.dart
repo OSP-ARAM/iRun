@@ -5,6 +5,7 @@ import 'oss_licenses_page.dart';
 import 'privacy_policy.dart';
 import 'terms_of_service.dart';
 import 'tts_setting_page.dart';
+import 'package:irun/option/delete_user.dart';
 
 class OptionPage extends StatelessWidget {
   const OptionPage({Key? key}) : super(key: key);
@@ -67,6 +68,17 @@ class OptionPage extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return LogoutPage(context: context);
+                },
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('회원 탈퇴'),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return DeletePage(context: context);
                 },
               );
             },
