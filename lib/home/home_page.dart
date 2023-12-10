@@ -95,7 +95,8 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("위치 권한 필요"),
-          content: Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
+          content:
+              Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
           actions: <Widget>[
             TextButton(
               child: Text("앱 종료"),
@@ -149,12 +150,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4, // 탭바의 수 설정
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.yellow, // AppBar 배경색 설정
           title: TabBar(
+            indicatorColor: Colors.red,
+            labelStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 16, // 원하는 폰트 크기로 변경
+              fontWeight: FontWeight.bold, // 원하는 글꼴 또는 굵기로 변경
+              // fontFamily: 'YourFontFamily', // 원하는 글꼴 설정 (옵션)
+            ),
             tabs: [
-              Tab(text: '메인'), // 탭바의 각 항목 설정
+              Tab(text: '메인'),
               Tab(text: '기록'),
               Tab(text: '랭킹'),
               Tab(text: '업적'),
@@ -337,10 +346,17 @@ class SelectedMissionsWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('선택된 미션', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          if (missionData.time != null) Text('시간: ${missionData.time}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          if (missionData.distance != null) Text('거리: ${missionData.distance}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          if (missionData.pace != null) Text('페이스: ${missionData.pace}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('선택된 미션',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          if (missionData.time != null)
+            Text('시간: ${missionData.time}',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.distance != null)
+            Text('거리: ${missionData.distance}',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.pace != null)
+            Text('페이스: ${missionData.pace}',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );
