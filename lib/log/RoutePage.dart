@@ -27,12 +27,7 @@ class _RoutePageState extends State<RoutePage> {
   @override
   void initState() {
     super.initState();
-    successful();
     _createPolylines();
-  }
-
-  Future<void> successful() async {
-    Map<String, List<String>> successfulMissions = widget.routeData['successfulMissions'];
   }
 
 
@@ -82,6 +77,9 @@ class _RoutePageState extends State<RoutePage> {
 
   @override
   Widget build(BuildContext context) {
+    String success1;
+    String success2;
+    String success3;
 
     Timestamp timestamp = widget.routeData['timestamp'] as Timestamp;
     DateTime dateTime = timestamp.toDate();
@@ -93,6 +91,30 @@ class _RoutePageState extends State<RoutePage> {
     data.forEach((key, value) {
       successfulMissions[key] = value.cast<dynamic>();
     });
+
+    if (successfulMissions['시간'] != null) {
+      success1 = successfulMissions['시간']!.join(',');
+      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
+      // result를 사용하는 코드 작성
+    } else {
+      success1 = 'X';
+    }
+
+    if (successfulMissions['거리'] != null) {
+      success2 = successfulMissions['거리']!.join(',');
+      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
+      // result를 사용하는 코드 작성
+    } else {
+      success2 = 'X';
+    }
+
+    if (successfulMissions['페이스'] != null) {
+      success3 = successfulMissions['페이스']!.join(',');
+      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
+      // result를 사용하는 코드 작성
+    } else {
+      success3 = 'X';
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -276,7 +298,7 @@ class _RoutePageState extends State<RoutePage> {
                   Container(
                     alignment: Alignment.center,
                     child: Text(
-                      successfulMissions['거리']!.first,
+                      '$success1',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -301,7 +323,7 @@ class _RoutePageState extends State<RoutePage> {
                   Container(
                     alignment: Alignment.center,
                     child: Text(
-                      successfulMissions['시간']!.join(','),
+                      '$success2',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -326,7 +348,7 @@ class _RoutePageState extends State<RoutePage> {
                   Container(
                     alignment: Alignment.center,
                     child: Text(
-                      successfulMissions['페이스']!.join(','),
+                      '$success3',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
