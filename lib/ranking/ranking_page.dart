@@ -22,6 +22,40 @@ Future<List<Map<String, dynamic>>> getAllUserProfiles() async {
   ).toList();
 }
 
+double calculateScoreForMission(int num, double scorePerCompletion) {
+  return num * scorePerCompletion;
+}
+
+Future<double> getUserMissionScore(String userId) async {
+  double totalScore = 0.0;
+
+  final Map<String, double> missionScores = {
+    'distance10': 1.5,
+    'distance5': 1.0,
+    'distance3': 0.5,
+    'pace550': 1.5,
+    'pace600': 1.0,
+    'pace630': 0.5,
+    'time15': 0.5,
+    'time30': 1.0,
+    'time60': 1.5,
+  };
+
+  CollectionReference missionsRef = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(userId)
+      .collection('Mission');
+
+  for (var mission in missionScores.keys) {
+    DocumentSnapshot missionDoc = await missionsRef.doc(mission).get();
+    Map<String, dynamic> missionData = missionDoc.data() as Map<String, dynamic>? ?? {};
+    int num = missionData['num'] ?? 0;
+    totalScore += calculateScoreForMission(num, missionScores[mission]!);
+  }
+
+  return totalScore;
+}
+
 Future<double> getTotalDistance(String userId) async {
   double totalDistance = 0.0;
 
@@ -69,26 +103,31 @@ class _RankingPageState extends State<RankingPage> {
   List<Map<String, dynamic>> users = [];
   Future<void> loadUserProfilesAndRank() async {
     List<Map<String, dynamic>> userProfiles = await getAllUserProfiles();
-    List<Future<double>> distanceFutures = [];
+    List<Future<double>> missionScoreFutures = [];
 
     for (var userProfile in userProfiles) {
-      distanceFutures.add(getTotalDistance(userProfile['uid']));
+      missionScoreFutures.add(getUserMissionScore(userProfile['uid']));
     }
 
-    List<double> distances = await Future.wait(distanceFutures);
+    List<double> missionScores = await Future.wait(missionScoreFutures);
 
     for (int i = 0; i < userProfiles.length; i++) {
-      userProfiles[i]['totalDistance'] = distances[i];
+      double totalDistance = await getTotalDistance(userProfiles[i]['uid']);
+      double totalScore = totalDistance + missionScores[i];
+
+      userProfiles[i]['totalScore'] = totalScore;
     }
 
-    userProfiles.sort((a, b) => b['totalDistance'].compareTo(a['totalDistance']));
+    userProfiles.sort((a, b) => b['totalScore'].compareTo(a['totalScore']));
 
     int myIndex = userProfiles.indexWhere((user) => user['uid'] == uid);
 
-    setState(() {
-      users = userProfiles;
-      myRankingIndex = myIndex;
-    });
+    if (mounted) {
+      setState(() {
+        users = userProfiles;
+        myRankingIndex = myIndex;
+      });
+    }
   }
 
   @override
@@ -133,7 +172,7 @@ class _RankingPageState extends State<RankingPage> {
                           ],
                         ),
                         title: Text(user['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('총 거리 : ${user['totalDistance'].toStringAsFixed(2)} km'),
+                        subtitle: Text('점수 : ${user['totalScore'].toStringAsFixed(2)}'),
                       ),
                     );
                   } else {
@@ -163,7 +202,7 @@ class _RankingPageState extends State<RankingPage> {
                   viewMyRanking = true;
                 });
               },
-              child: const Text('내 티어'),
+              child: const Text('내 순위'),
             ),
           ],
         ),
