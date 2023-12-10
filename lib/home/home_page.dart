@@ -338,9 +338,9 @@ class SelectedMissionsWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('선택된 미션', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          if (missionData.time != null) Text('시간: ${missionData.time}'),
-          if (missionData.distance != null) Text('거리: ${missionData.distance}'),
-          if (missionData.pace != null) Text('페이스: ${missionData.pace}'),
+          if (missionData.time != null) Text('시간: ${missionData.time}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.distance != null) Text('거리: ${missionData.distance}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          if (missionData.pace != null) Text('페이스: ${missionData.pace}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );
