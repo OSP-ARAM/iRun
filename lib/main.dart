@@ -1,18 +1,22 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:irun/Achievements/achievements_page.dart';
-import 'package:irun/home/home_page.dart';
-import 'package:irun/log/log_page.dart';
-import 'package:irun/mission/mission_page.dart';
-import 'package:irun/music/music_page.dart';
-import 'package:irun/option/option_page.dart';
-import 'package:irun/ranking/ranking_page.dart';
-import 'package:irun/record/stop_record_page.dart';
-import 'firebase_options.dart';
-import 'package:irun/record/record_page.dart';
-import 'package:irun/login/body_measurement_page.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:provider/provider.dart';
+
+import 'Achievements/achievement_provider.dart';
+import 'Achievements/achievements_page.dart';
+
+import 'firebase_options.dart';
+import 'home/home_page.dart';
+import 'log/log_page.dart';
+import 'mission/mission_page.dart';
+import 'music/music_page.dart';
+import 'option/option_page.dart';
+import 'ranking/ranking_page.dart';
+import 'record/stop_record_page.dart';
+import 'record/record_page.dart';
+import 'login/body_measurement_page.dart';
 import 'login/login_page.dart';
 
 void main() async {
@@ -20,49 +24,46 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(ChangeNotifierProvider(
-    create: (context) => MissionData(),
-    child: const MyApp(),
-  ));
-  _startBackgroundTask();
-}
 
-Future<void> _startBackgroundTask() async {
-  await AudioService.start(
-    backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-    androidNotificationChannelName: 'Music Player',
-    androidNotificationColor: 0xFF2196f3,
-    androidNotificationIcon: 'mipmap/ic_launcher',
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MissionData()),
+        ChangeNotifierProvider(create: (_) => AchievementsProvider())
+      ],
+      child: const MaterialApp(home: MyApp()),
+    ),
   );
 }
 
-void _audioPlayerTaskEntrypoint() {
-  AudioServiceBackground.run(() => AudioPlayerTask());
-}
-
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final achievementsProvider =
+        Provider.of<AchievementsProvider>(context, listen: false);
+    if (!achievementsProvider.isInitialized) {
+      achievementsProvider.initializeDatabase();
+      achievementsProvider.isInitialized = true;
+    }
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      //home: LoginPage(),
-
       routes: {
-        '/' : (context) => LoginPage(),
-        '/home' : (context) => const MyHomePage(),
-        '/music' : (context) => const MusicPage(),
-        '/ranking' : (context) => RankingPage(),
-        '/option' : (context) => const OptionPage(),
-        '/record' : (context) => MapScreen(),
-        '/log' : (context) => const LogPage(),
-        '/Achievements' : (context) => const AchievementsPage(),
-        '/body' : (context) => BodyMeasurementPage()
+        '/': (context) => LoginPage(),
+        '/home': (context) => const MyHomePage(),
+        '/music': (context) => const MusicPage(),
+        '/ranking': (context) => const RankingPage(),
+        '/option': (context) => const OptionPage(),
+        '/record': (context) => const MapScreen(),
+        '/log': (context) => const LogPage(),
+        '/Achievements': (context) => const AchievementsPage(),
+        '/body': (context) => BodyMeasurementPage()
       },
       initialRoute: '/',
     );

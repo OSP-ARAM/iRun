@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CustomIconPickerDialog extends StatefulWidget {
+  const CustomIconPickerDialog({super.key});
+
   @override
   _CustomIconPickerDialogState createState() => _CustomIconPickerDialogState();
 }
 
 class CustomIconPicker extends StatefulWidget {
+  const CustomIconPicker({super.key});
+
   static Future<Map<String, String?>?> show(BuildContext context) async {
     return await showDialog<Map<String, String?>>(
       context: context,
       builder: (BuildContext context) {
-        return CustomIconPickerDialog();
+        return const CustomIconPickerDialog();
       },
     );
   }
@@ -34,7 +38,7 @@ class _CustomIconPickerState extends State<CustomIconPicker> {
       child: Container(
         height: 300,
         width: 300,
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: GridView.count(
           crossAxisCount: 3,
           children: [
@@ -89,7 +93,8 @@ class IconSelector extends StatelessWidget {
   final IconData? selectedIcon;
   final Function(IconData) onIconSelected;
 
-  IconSelector({
+  const IconSelector({
+    super.key,
     required this.category,
     required this.icon,
     required this.selectedIcon,
@@ -103,7 +108,9 @@ class IconSelector extends StatelessWidget {
       children: [
         Text(category),
         IconButton(
-          icon: Icon(icon, size: 40, color: icon == selectedIcon ? Colors.blue : Colors.black),
+          icon: Icon(icon,
+              size: 40,
+              color: icon == selectedIcon ? Colors.blue : Colors.black),
           onPressed: () {
             onIconSelected(icon);
           },
@@ -114,9 +121,9 @@ class IconSelector extends StatelessWidget {
 }
 
 class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
-  String? selectedTimeText = null;
-  String? selectedDistanceText= null;
-  String? selectedPaceText= null;
+  String? selectedTimeText;
+  String? selectedDistanceText;
+  String? selectedPaceText;
 
   void _handleDone() {
     // Provider를 통해 현재 컨텍스트의 MissionData에 접근
@@ -151,13 +158,13 @@ class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
       child: Container(
         height: 350,
         width: 300,
-        padding: EdgeInsets.all(17),
+        padding: const EdgeInsets.all(17),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             CategoryRow(
               category: '거리',
-              texts: ['3km', '5km', '10km'],
+              texts: const ['3km', '5km', '10km'],
               selectedText: selectedDistanceText,
               onTextSelected: (text) {
                 setState(() {
@@ -167,7 +174,7 @@ class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
             ),
             CategoryRow(
               category: '시간',
-              texts: ['15분', '30분', '1시간'],
+              texts: const ['15분', '30분', '1시간'],
               selectedText: selectedTimeText,
               onTextSelected: (text) {
                 setState(() {
@@ -177,7 +184,7 @@ class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
             ),
             CategoryRow(
               category: '페이스',
-              texts: ['630', '600', '550'],
+              texts: const ['630', '600', '550'],
               selectedText: selectedPaceText,
               onTextSelected: (text) {
                 setState(() {
@@ -187,14 +194,15 @@ class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
             ),
             ElevatedButton(
               onPressed: _handleDone,
-              child: Text('완료'),
+              child: const Text('완료'),
             ),
             ElevatedButton(
               onPressed: _resetSelections,
-              child: Text('초기화'),
               style: ElevatedButton.styleFrom(
-                primary: Colors.red, // Optional: Change the color if needed
+                backgroundColor:
+                    Colors.red, // Optional: Change the color if needed
               ),
+              child: const Text('초기화'),
             ),
           ],
         ),
@@ -209,7 +217,8 @@ class CategoryRow extends StatelessWidget {
   final String? selectedText;
   final Function(String) onTextSelected;
 
-  CategoryRow({
+  const CategoryRow({
+    super.key,
     required this.category,
     required this.texts,
     required this.selectedText,
@@ -225,7 +234,7 @@ class CategoryRow extends StatelessWidget {
           flex: 1,
           child: Text(
             category,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold, // 글씨를 굵게 설정
             ),
           ),

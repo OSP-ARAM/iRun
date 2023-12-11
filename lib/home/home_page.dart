@@ -6,8 +6,7 @@ import 'package:irun/mission/button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:irun/log/log_page.dart';
 import 'package:irun/ranking/ranking_page.dart';
-import 'package:irun/Achievements/Achievements_page.dart';
-
+import 'package:irun/Achievements/achievements_page.dart';
 import 'weather_model.dart';
 import 'weather_service.dart';
 
@@ -95,8 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("위치 권한 필요"),
-          content:
-              const Text("이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
+          content: const Text(
+              "이 앱은 위치 서비스를 사용하기 위해 위치 권한이 필요합니다. 앱을 사용하려면 권한을 허용해 주세요."),
           actions: <Widget>[
             TextButton(
               child: const Text("앱 종료"),
@@ -186,7 +185,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                   initialCameraPosition: CameraPosition(
-                    target: currentLocation ?? const LatLng(36.1433405, 128.393805),
+                    target:
+                        currentLocation ?? const LatLng(36.1433405, 128.393805),
                     // 금오공대 좌표를 기본값으로 설정
                     // 기본값 또는 원하는 다른 위치의 좌표로 설정
                     zoom: 16.0,
@@ -298,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   top: 100,
                   left: 0,
                   child: SelectedMissionsWidget(),
@@ -308,12 +308,12 @@ class _MyHomePageState extends State<MyHomePage> {
             const Center(
               child: LogPage(),
             ),
-            Center(
+            const Center(
               child: RankingPage(),
             ),
             const Center(
               child: AchievementsPage(),
-            ),
+            )
           ],
         ),
       ),
@@ -343,13 +343,16 @@ class SelectedMissionsWidget extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           if (missionData.time != null)
             Text('시간: ${missionData.time}',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           if (missionData.distance != null)
             Text('거리: ${missionData.distance}',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           if (missionData.pace != null)
             Text('페이스: ${missionData.pace}',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );
