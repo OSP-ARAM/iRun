@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 
 class FirestoreService {
-
   static Future<void> uploadDataToFirestore({
     required User user,
     required Position currentLocation,
@@ -17,11 +16,11 @@ class FirestoreService {
   }) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    if (currentLocation != null && markers.isNotEmpty) {
+    if (markers.isNotEmpty) {
       String formattedTime = _formatTime(stopwatch.elapsedMilliseconds);
       String formattedDistance = (totalDistance / 1000).toStringAsFixed(2);
-      String pace = _calculatePace(
-          totalDistance, stopwatch.elapsedMilliseconds);
+      String pace =
+          _calculatePace(totalDistance, stopwatch.elapsedMilliseconds);
 
       DateTime now = DateTime.now();
       String timestamp = now.toIso8601String();
@@ -42,7 +41,8 @@ class FirestoreService {
       // 총 시간을 분으로 계산
       int totalMinutes = hours * 60 + minutes;
 
-      String calculatedPace = FirestoreService._calculatePace(totalDistance, stopwatch.elapsedMilliseconds);
+      String calculatedPace = FirestoreService._calculatePace(
+          totalDistance, stopwatch.elapsedMilliseconds);
 
       // 페이스 문자열을 분과 초로 분리
       List<String> paceParts = calculatedPace.split("'");
@@ -65,7 +65,7 @@ class FirestoreService {
       // Run record 컬렉션에 저장
       await firestore
           .collection("Users")
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection("Run record")
           .doc(timestamp)
           .set(runData.toJson());
@@ -86,7 +86,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -116,15 +116,14 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-          {
-            successfulMissions['거리']?.add('3km');
-          }
+        if (success) {
+          successfulMissions['거리']?.add('3km');
+        }
       }
 
       //5km
@@ -136,7 +135,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -166,13 +165,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['거리']?.add('5km');
         }
       }
@@ -186,7 +184,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -216,13 +214,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['거리']?.add('10km');
         }
       }
@@ -236,7 +233,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -266,13 +263,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['시간']?.add('15분');
         }
       }
@@ -286,7 +282,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -316,13 +312,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['시간']?.add('30분');
         }
       }
@@ -336,7 +331,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -366,13 +361,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['시간']?.add('1시간');
         }
       }
@@ -386,7 +380,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -418,13 +412,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['페이스']?.add('630');
         }
       }
@@ -438,7 +431,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -470,13 +463,12 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['페이스']?.add('600');
         }
       }
@@ -490,7 +482,7 @@ class FirestoreService {
 
         DocumentSnapshot snapshot = await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .get();
@@ -522,23 +514,23 @@ class FirestoreService {
 
         await firestore
             .collection("Users")
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection("Mission")
             .doc(lottieFileName)
             .update({'num': num, 'state': state});
 
-        if(success)
-        {
+        if (success) {
           successfulMissions['페이스']?.add('550');
         }
       }
 
       await firestore
           .collection("Users")
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection("Run record")
           .doc(timestamp)
-          .set({'successfulMissions': successfulMissions}, SetOptions(merge: true));
+          .set({'successfulMissions': successfulMissions},
+              SetOptions(merge: true));
     }
   }
 
@@ -595,8 +587,7 @@ class RunData {
       'timestamp': timestamp,
       'route': routePoints,
       'pace': pace,
-      'caloriesBurned' : caloriesBurned,
+      'caloriesBurned': caloriesBurned,
     };
   }
 }
-

@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:irun/Achievements/achievement_provider.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
 import 'package:irun/record/firestore_service.dart';
@@ -69,12 +70,9 @@ class _StopMapScreenState extends State<StopMapScreen> {
     int? age;
     bool gender = true;
 
-
     // 정보 가져오기
-    DocumentSnapshot userInfoSnapshot = await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .get();
+    DocumentSnapshot userInfoSnapshot =
+        await firestore.collection("Users").doc(user!.uid).get();
 
     if (userInfoSnapshot.exists) {
       height = userInfoSnapshot['height'];
@@ -83,20 +81,19 @@ class _StopMapScreenState extends State<StopMapScreen> {
       gender = userInfoSnapshot['gender'];
     }
 
-
     setState(() {
-      caloriesBurned = calculateCalories(weight!, height!, age!, gender, widget.totalDistance / 1000);
+      caloriesBurned = calculateCalories(
+          weight!, height!, age!, gender, widget.totalDistance / 1000);
     });
   }
 
-  void _stopRecording() async {
+  Future<void> _stopRecording(BuildContext context) async {
     _stopwatch.stop();
     _positionStreamSubscription?.cancel();
     _timer?.cancel();
 
     // FirestoreService를 사용하여 데이터 저장
     final missionData = Provider.of<MissionData>(context, listen: false);
-
     await FirestoreService.uploadDataToFirestore(
       user: user!,
       currentLocation: widget.currentLocation!,
@@ -106,7 +103,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
       missionData: missionData,
       caloriesBurned: caloriesBurned,
     );
-
+    Provider.of<AchievementsProvider>(context, listen: false)
+        .refreshMissionData();
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
@@ -131,7 +129,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
     // 경도와 위도의 차이를 계산하여 확대 수준 결정
     double latDiff = maxLat - minLat;
     double lngDiff = maxLng - minLng;
-    double zoomLevel = min(log(360 / lngDiff) / log(2), log(180 / latDiff) / log(2));
+    double zoomLevel =
+        min(log(360 / lngDiff) / log(2), log(180 / latDiff) / log(2));
 
     return zoomLevel; // 조정 가능한 값으로 조절
   }
@@ -144,7 +143,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
     }
   }
 
-  double calculateCalories(double weight, double height, int age, bool isMale, double distance) {
+  double calculateCalories(
+      double weight, double height, int age, bool isMale, double distance) {
     double bmr = calculateBMR(weight, height, age, isMale);
     // 활동 계수 1.55는 중간 정도의 활동을 가정
     double tdee = bmr * 1.55;
@@ -165,10 +165,9 @@ class _StopMapScreenState extends State<StopMapScreen> {
         title: const Text('Running'),
       ),
       body: LayoutBuilder(
-
-        builder: (BuildContext context, BoxConstraints constraints) {
-          double height = MediaQuery.of(context).size.height * 1;
-          return Column(
+          builder: (BuildContext context, BoxConstraints constraints) {
+        double height = MediaQuery.of(context).size.height * 1;
+        return Column(
           children: [
             Container(
                 height: height * 0.2, // 컨테이너 높이 조정
@@ -182,11 +181,13 @@ class _StopMapScreenState extends State<StopMapScreen> {
                       children: [
                         Text(
                           '시간: ${widget.formattedTime}',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '거리: $formattedDistance km',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -196,19 +197,20 @@ class _StopMapScreenState extends State<StopMapScreen> {
                       children: [
                         Text(
                           '페이스: ${widget.pace}',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '칼로리: ${caloriesBurned.toStringAsFixed(1)} kcal',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                   ],
-                )
-            ),
+                )),
             SizedBox(
-              height: height*0.5,
+              height: height * 0.5,
               child: GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   rootBundle
@@ -245,7 +247,7 @@ class _StopMapScreenState extends State<StopMapScreen> {
                     color: Colors.blue,
                     points: widget.routeData
                         .map((data) =>
-                        LatLng(data['latitude']!, data['longitude']!))
+                            LatLng(data['latitude']!, data['longitude']!))
                         .toList(),
                   ),
                 ]),
@@ -259,7 +261,7 @@ class _StopMapScreenState extends State<StopMapScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Container(
-                  height: height*0.15,
+                  height: height * 0.15,
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     onPressed: () {
@@ -269,11 +271,11 @@ class _StopMapScreenState extends State<StopMapScreen> {
                   ),
                 ), // 버튼 사이 간격 조절을 위한 SizedBox 사용
                 Container(
-                  height: height*0.15,
+                  height: height * 0.15,
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      _stopRecording();
+                      _stopRecording(context);
                     },
                     child: const Text('종료'),
                   ),
@@ -281,8 +283,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
               ],
             ),
           ],
-        ); }
-      ),
+        );
+      }),
     );
   }
 

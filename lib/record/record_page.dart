@@ -14,6 +14,8 @@ import 'package:irun/record/stop_record_page.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -55,7 +57,6 @@ class _MapScreenState extends State<MapScreen> {
       isrunningflag = false; // 러닝 재개
     });
 
-
     _stopwatch.stop();
     _positionStreamSubscription?.pause();
     _timer?.cancel();
@@ -76,7 +77,7 @@ class _MapScreenState extends State<MapScreen> {
           formattedTime: _formatTime(_stopwatch.elapsedMilliseconds),
           pace: _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds),
           routeData: routeData, // 경로 데이터 전달
-          currentLocation : _currentLocation,
+          currentLocation: _currentLocation,
           markers: _markers,
           stopwatch: _stopwatch,
           totalDistance: _totalDistance,
@@ -100,12 +101,13 @@ class _MapScreenState extends State<MapScreen> {
   void _resumeRecording() {
     _stopwatch.start();
 
-    var locationSettings =
-    const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+    var locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high, distanceFilter: 1);
 
     if (_positionStreamSubscription == null) {
-      _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
-          .listen((Position position) {
+      _positionStreamSubscription =
+          Geolocator.getPositionStream(locationSettings: locationSettings)
+              .listen((Position position) {
         _updateCameraPosition(position);
         if (isrunningflag) {
           _updatePolyline(position);
@@ -124,13 +126,13 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-   Future<void> _initTTS() async {
-     isSetted = await TTSSettingState.getIsSetted();
-     if (isSetted) {
-       tts = await TTSSetting.getTtsWithSettings(); // tts 인스턴스를 설정으로 업데이트
-       tts.speak('러닝을 시작합니다. 힘내세요!');
-     }
-   }
+  Future<void> _initTTS() async {
+    isSetted = await TTSSettingState.getIsSetted();
+    if (isSetted) {
+      tts = await TTSSetting.getTtsWithSettings(); // tts 인스턴스를 설정으로 업데이트
+      tts.speak('러닝을 시작합니다. 힘내세요!');
+    }
+  }
 
   void _speak(String message) async {
     if (isSetted) {
@@ -148,7 +150,7 @@ class _MapScreenState extends State<MapScreen> {
         Marker(
           markerId: const MarkerId('startLocation'),
           position:
-          LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
+              LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
           infoWindow: const InfoWindow(title: 'Start Location'),
           visible: false,
         ),
@@ -159,15 +161,15 @@ class _MapScreenState extends State<MapScreen> {
 
   void _startRecording() {
     _stopwatch.start();
-    var locationSettings =
-    const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 1);
+    var locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high, distanceFilter: 1);
 
     _positionStreamSubscription =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position position) {
-          _updateCameraPosition(position);
-          _updatePolyline(position);
-        });
+      _updateCameraPosition(position);
+      _updatePolyline(position);
+    });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() {}); // This will trigger a rebuild every second
@@ -187,12 +189,9 @@ class _MapScreenState extends State<MapScreen> {
     int? age;
     bool gender = true;
 
-
     // 정보 가져오기
-    DocumentSnapshot userInfoSnapshot = await firestore
-        .collection("Users")
-        .doc(user!.uid)
-        .get();
+    DocumentSnapshot userInfoSnapshot =
+        await firestore.collection("Users").doc(user!.uid).get();
 
     if (userInfoSnapshot.exists) {
       height = userInfoSnapshot['height'];
@@ -201,20 +200,20 @@ class _MapScreenState extends State<MapScreen> {
       gender = userInfoSnapshot['gender'];
     }
 
-
-    double caloriesBurned = calculateCalories(weight!, height!, age!, gender, _totalDistance / 1000); // m를 km로 변환
+    double caloriesBurned = calculateCalories(
+        weight!, height!, age!, gender, _totalDistance / 1000); // m를 km로 변환
 
     // FirestoreService를 사용하여 데이터 저장
     final missionData = Provider.of<MissionData>(context, listen: false);
 
     await FirestoreService.uploadDataToFirestore(
-    user: user!,
-    currentLocation: _currentLocation!,
-    markers: _markers,
-    stopwatch: _stopwatch,
-    totalDistance: _totalDistance,
-    missionData: missionData,
-    caloriesBurned: caloriesBurned,
+      user: user!,
+      currentLocation: _currentLocation!,
+      markers: _markers,
+      stopwatch: _stopwatch,
+      totalDistance: _totalDistance,
+      missionData: missionData,
+      caloriesBurned: caloriesBurned,
     );
 
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
@@ -324,7 +323,8 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  double calculateCalories(double weight, double height, int age, bool isMale, double distance) {
+  double calculateCalories(
+      double weight, double height, int age, bool isMale, double distance) {
     double bmr = calculateBMR(weight, height, age, isMale);
     // 활동 계수 1.55는 중간 정도의 활동을 가정
     double tdee = bmr * 1.55;
@@ -339,10 +339,9 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     String formattedTime = _formatTime(_stopwatch.elapsedMilliseconds);
-    String formattedDistance =
-        _totalDistance.toStringAsFixed(0) + ' m';
+    String formattedDistance = '${_totalDistance.toStringAsFixed(0)} m';
     String pace =
-    _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
+        _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
 
     return Scaffold(
       appBar: AppBar(
@@ -358,17 +357,20 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   Text(
                     'Time: $formattedTime',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Distance: $formattedDistance',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Pace: $pace',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -403,5 +405,4 @@ class _MapScreenState extends State<MapScreen> {
     _timer?.cancel();
     super.dispose();
   }
-
 }

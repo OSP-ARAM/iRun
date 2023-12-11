@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RankingPage extends StatefulWidget {
+  const RankingPage({super.key});
+
   @override
   _RankingPageState createState() => _RankingPageState();
 }
@@ -12,14 +14,14 @@ String? uid = currentUser?.uid;
 
 Future<List<Map<String, dynamic>>> getAllUserProfiles() async {
   QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').get();
+      await FirebaseFirestore.instance.collection('Users').get();
 
-  return querySnapshot.docs.map((doc) =>
-    {
-      'uid': doc.id,
-      ...doc.data() as Map<String, dynamic>,
-    }
-  ).toList();
+  return querySnapshot.docs
+      .map((doc) => {
+            'uid': doc.id,
+            ...doc.data() as Map<String, dynamic>,
+          })
+      .toList();
 }
 
 double calculateScoreForMission(int num, double scorePerCompletion) {
@@ -83,7 +85,8 @@ Future<double> getTotalDistance(String userId) async {
   return totalDistance;
 }
 
-int calculateMyRankingIndex(String myUid, List<QueryDocumentSnapshot> userDocs) {
+int calculateMyRankingIndex(
+    String myUid, List<QueryDocumentSnapshot> userDocs) {
   for (int i = 0; i < userDocs.length; i++) {
     if (userDocs[i].id == myUid) {
       return i;
@@ -154,7 +157,9 @@ class _RankingPageState extends State<RankingPage> {
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   var user = users[index];
-                  if (!viewMyRanking || (index >= myRankingIndex - 2 && index <= myRankingIndex + 3)) {
+                  if (!viewMyRanking ||
+                      (index >= myRankingIndex - 2 &&
+                          index <= myRankingIndex + 3)) {
                     return Card(
                       color: index == myRankingIndex ? Colors.yellow : null,
                       child: ListTile(
@@ -163,11 +168,16 @@ class _RankingPageState extends State<RankingPage> {
                           children: [
                             SizedBox(
                               width: 30,
-                              child: Text('${index + 1}', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                              child: Text('${index + 1}',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20)),
                             ),
                             const SizedBox(width: 20), // 숫자와 이미지 사이의 간격
                             user['photoURL'] != null
-                                ? Image.network(user['photoURL'], width: 40, height: 40)
+                                ? Image.network(user['photoURL'],
+                                    width: 40, height: 40)
                                 : const CircleAvatar(child: Icon(Icons.person)),
                           ],
                         ),
