@@ -92,18 +92,29 @@ class _AchievementsPageState extends State<AchievementsPage>
     final timeData = achievementsProvider.timeData;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _buildCategory("거리 km", distanceData, _distanceController),
-              const SizedBox(height: 16.0),
-              _buildCategory("시간 min", timeData, _timeController),
-              const SizedBox(height: 16.0),
-              _buildCategory("페이스", paceData, _paceController),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Center(
+              child: SizedBox(
+                width: 900,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _buildCategory(
+                          "거리 km", distanceData, _distanceController),
+                      const SizedBox(height: 16.0),
+                      _buildCategory("시간 min", timeData, _timeController),
+                      const SizedBox(height: 16.0),
+                      _buildCategory("페이스", paceData, _paceController),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -136,7 +147,8 @@ class _AchievementsPageState extends State<AchievementsPage>
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,
                   ),
-                  itemCount: data.length, // 데이터의 길이만큼 아이템을 생성
+                  itemCount: data.length,
+                  // 데이터의 길이만큼 아이템을 생성
                   itemBuilder: (context, index) {
                     return Card(
                       elevation: 4.0,
