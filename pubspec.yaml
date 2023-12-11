@@ -38,7 +38,7 @@ dependencies:
   shared_preferences:
   geolocator: ^10.1.0
   geocoding: ^2.1.1
-  provider:
+  provider: ^6.1.1
   assets_audio_player:
   audio_service:
   just_audio:
