@@ -126,87 +126,93 @@ class _CustomIconPickerDialogState extends State<CustomIconPickerDialog> {
   String? selectedPaceText;
 
   void _handleDone() {
-    // Provider를 통해 현재 컨텍스트의 MissionData에 접근
+    // MissionData에 접근하여 데이터 업데이트
     final missionData = Provider.of<MissionData>(context, listen: false);
-
-    // 선택된 미션 데이터로 MissionData 객체 업데이트
     missionData.time = selectedTimeText;
     missionData.distance = selectedDistanceText;
     missionData.pace = selectedPaceText;
-
-    Navigator.of(context).pop();
-  }
-
-  void _resetSelections() {
-    // Provider를 통해 현재 컨텍스트의 MissionData에 접근
-    final missionData = Provider.of<MissionData>(context, listen: false);
-
-    // 선택된 미션 데이터로 MissionData 객체 업데이트
-    missionData.time = null;
-    missionData.distance = null;
-    missionData.pace = null;
-
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return Dialog(
+      backgroundColor: Colors.brown[200], // Dialog 배경색을 회색으로 변경
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Container(
-        height: 350,
-        width: 300,
         padding: const EdgeInsets.all(17),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            CategoryRow(
-              category: '거리',
-              texts: const ['3km', '5km', '10km'],
-              selectedText: selectedDistanceText,
-              onTextSelected: (text) {
-                setState(() {
-                  selectedDistanceText = text;
-                });
-              },
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              '거리',
+              style: theme.textTheme.headline6!.copyWith(fontWeight: FontWeight.bold),
             ),
-            CategoryRow(
-              category: '시간',
-              texts: const ['15분', '30분', '1시간'],
-              selectedText: selectedTimeText,
-              onTextSelected: (text) {
-                setState(() {
-                  selectedTimeText = text;
-                });
-              },
+            _buildButtonBar(['3km', '5km', '10km'], selectedDistanceText),
+            Text(
+              '시간',
+              style: theme.textTheme.headline6!.copyWith(fontWeight: FontWeight.bold),
             ),
-            CategoryRow(
-              category: '페이스',
-              texts: const ['630', '600', '550'],
-              selectedText: selectedPaceText,
-              onTextSelected: (text) {
-                setState(() {
-                  selectedPaceText = text;
-                });
-              },
+            _buildButtonBar(['15분', '30분', '1시간'], selectedTimeText),
+            Text(
+              '페이스',
+              style: theme.textTheme.headline6!.copyWith(fontWeight: FontWeight.bold),
             ),
-            ElevatedButton(
-              onPressed: _handleDone,
-              child: const Text('완료'),
-            ),
-            ElevatedButton(
-              onPressed: _resetSelections,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    Colors.red, // Optional: Change the color if needed
+            _buildButtonBar(['630', '600', '550'], selectedPaceText),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: _handleDone,
+                child: Text(
+                  '완료',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.brown[400],
+                  onPrimary: Colors.black,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
-              child: const Text('초기화'),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildButtonBar(List<String> labels, String? selectedLabel) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8.0, // 각 버튼 사이의 공간
+      children: labels.map((label) {
+        return ChoiceChip(
+          label: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+          selected: label == selectedLabel,
+          onSelected: (bool selected) {
+            setState(() {
+              if (label.endsWith('km')) {
+                selectedDistanceText = selected ? label : null;
+              } else if (label.endsWith('분') || label == '1시간') {
+                selectedTimeText = selected ? label : null;
+              } else {
+                selectedPaceText = selected ? label : null;
+              }
+            });
+          },
+          selectedColor: Colors.yellow,
+          backgroundColor: Colors.grey[200],
+          labelStyle: TextStyle(
+            color: label == selectedLabel ? Colors.black : Colors.grey,
+            fontWeight: FontWeight.bold, // 선택되지 않은 버튼의 글씨도 굵게
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -227,41 +233,46 @@ class CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Text(
-            category,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold, // 글씨를 굵게 설정
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Text(
+              category,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange, // 메인 컬러 적용
+              ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: texts.map((text) {
-              return TextButton(
-                onPressed: () {
-                  onTextSelected(text);
-                },
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    color: text == selectedText ? Colors.blue : Colors.black,
+          Expanded(
+            flex: 3,
+            child: Wrap(
+              spacing: 8.0,
+              children: texts.map((text) {
+                bool isSelected = text == selectedText;
+                return ChoiceChip(
+                  label: Text(text),
+                  selected: isSelected,
+                  onSelected: (_) => onTextSelected(text),
+                  selectedColor: Colors.yellow,
+                  backgroundColor: Colors.grey.shade200,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.black : Colors.grey.shade600,
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
+
 
 class MissionData extends ChangeNotifier {
   String? _time;
