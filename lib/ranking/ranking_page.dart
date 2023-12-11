@@ -84,8 +84,7 @@ class _RankingPageState extends State<RankingPage> {
       userProfiles[i]['totalDistance'] = distances[i];
     }
 
-    userProfiles
-        .sort((a, b) => b['totalDistance'].compareTo(a['totalDistance']));
+    userProfiles.sort((a, b) => b['totalScore'].compareTo(a['totalScore']));
 
     int myIndex = userProfiles.indexWhere((user) => user['uid'] == uid);
 
@@ -143,11 +142,8 @@ class _RankingPageState extends State<RankingPage> {
                                 : const CircleAvatar(child: Icon(Icons.person)),
                           ],
                         ),
-                        title: Text(user['displayName'] ?? 'No Name',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(
-                            '총 거리 : ${user['totalDistance'].toStringAsFixed(2)} km'),
+                        title: Text(user['displayName'] ?? 'No Name', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('점수 : ${user['totalScore'].toStringAsFixed(2)}'),
                       ),
                     );
                   } else {
