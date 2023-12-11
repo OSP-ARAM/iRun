@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:irun/mission/button.dart';
+import 'package:irun/music/music_page.dart';
 import 'package:lottie/lottie.dart';
 import 'package:irun/log/log_page.dart';
 import 'package:irun/ranking/ranking_page.dart';
@@ -155,176 +157,229 @@ class _MyHomePageState extends State<MyHomePage> {
       achievementsProvider.initializeDatabase();
       achievementsProvider.isInitialized = true;
     }
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.yellow, // AppBar 배경색 설정
-          title: const TabBar(
-            indicatorColor: Colors.red,
-            labelStyle: TextStyle(
-              color: Colors.white,
-              fontSize: 16, // 원하는 폰트 크기로 변경
-              fontWeight: FontWeight.bold, // 원하는 글꼴 또는 굵기로 변경
-              // fontFamily: 'YourFontFamily', // 원하는 글꼴 설정 (옵션)
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+        child: DefaultTabController(
+          length: 4,
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.yellow, // AppBar 배경색 설정
+              title: const TabBar(
+                indicatorColor: Colors.red,
+                labelStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16, // 원하는 폰트 크기로 변경
+                  fontWeight: FontWeight.bold, // 원하는 글꼴 또는 굵기로 변경
+                  // fontFamily: 'YourFontFamily', // 원하는 글꼴 설정 (옵션)
+                ),
+                tabs: [
+                  Tab(text: '메인'),
+                  Tab(text: '기록'),
+                  Tab(text: '랭킹'),
+                  Tab(text: '업적'),
+                ],
+              ),
             ),
-            tabs: [
-              Tab(text: '메인'),
-              Tab(text: '기록'),
-              Tab(text: '랭킹'),
-              Tab(text: '업적'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            // 각 탭에 대한 내용 설정
-            Stack(
+            body: TabBarView(
               children: [
-                // GoogleMap 및 기타 위젯들
-                GoogleMap(
-                  onMapCreated: (GoogleMapController controller) {
-                    rootBundle
-                        .loadString('assets/map/mapstyle.json')
-                        .then((String mapStyle) {
-                      controller.setMapStyle(mapStyle);
-                      mapController = controller;
-                    });
-                  },
-                  initialCameraPosition: CameraPosition(
-                    target:
+                // 각 탭에 대한 내용 설정
+                Stack(
+                  children: [
+                    // GoogleMap 및 기타 위젯들
+                    GoogleMap(
+                      onMapCreated: (GoogleMapController controller) {
+                        rootBundle
+                            .loadString('assets/map/mapstyle.json')
+                            .then((String mapStyle) {
+                          controller.setMapStyle(mapStyle);
+                          mapController = controller;
+                        });
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target:
                         currentLocation ?? const LatLng(36.1433405, 128.393805),
-                    // 금오공대 좌표를 기본값으로 설정
-                    // 기본값 또는 원하는 다른 위치의 좌표로 설정
-                    zoom: 16.0,
-                  ),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 15,
-                    top: 15,
-                  ),
-                  child: ClipOval(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                        // 금오공대 좌표를 기본값으로 설정
+                        // 기본값 또는 원하는 다른 위치의 좌표로 설정
+                        zoom: 16.0,
                       ),
-                      height: 80,
-                      width: 80,
-                      // 흰색 배경 설정
-                      padding: const EdgeInsets.all(0),
-                      // 동그라미 내부 여백 설정
-                      child: Column(
-                        children: [
-                          Lottie.asset(
-                            getWeatherAnimation(_weather?.mainCondition),
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.fill,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: false,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 15,
+                        top: 15,
+                      ),
+                      child: ClipOval(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 10), // 아이콘과 온도 사이 여백 조절
-                          Text(
-                            "${_weather?.temperature.round()}℃",
+                          height: 80,
+                          width: 80,
+                          // 흰색 배경 설정
+                          padding: const EdgeInsets.all(0),
+                          // 동그라미 내부 여백 설정
+                          child: Column(
+                            children: [
+                              Lottie.asset(
+                                getWeatherAnimation(_weather?.mainCondition),
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.fill,
+                              ),
+                              const SizedBox(width: 10), // 아이콘과 온도 사이 여백 조절
+                              Text(
+                                "${_weather?.temperature.round()}℃",
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                // 기존의 UI 요소들
-                Positioned(
-                  bottom: 50,
-                  left: 80,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/record', (route) => false);
-                    },
-                    child: Lottie.asset(
-                      'images/start.json',
-                      width: 250.0,
-                      height: 250.0,
-                      fit: BoxFit.fill,
+                    // 기존의 UI 요소들
+                    Positioned(
+                      bottom: 50,
+                      left: 80,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/record', (route) => false);
+                        },
+                        child: Lottie.asset(
+                          'images/start.json',
+                          width: 250.0,
+                          height: 250.0,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                // 작은 원 1
-                Positioned(
-                  left: 100,
-                  bottom: 80,
-                  child: Container(
-                    width: 50.0,
-                    height: 50.0,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
+                    // 작은 원 1
+                    Positioned(
+                      left: 100,
+                      bottom: 80,
+                      child: Container(
+                        width: 50.0,
+                        height: 50.0,
+                        decoration: const BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/option');
+                          },
+                          icon: const Icon(Icons.settings),
+                          iconSize: 30,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/option');
-                      },
-                      icon: const Icon(Icons.settings),
-                      iconSize: 30,
-                      color: Colors.white,
+                    // 작은 원 2
+                    const Positioned(
+                      left: 180,
+                      bottom: 50,
+                      child: SizedBox(
+                        width: 50.0,
+                        height: 50.0,
+                        child: CustomIconButton(),
+                      ),
                     ),
-                  ),
-                ),
-                // 작은 원 2
-                const Positioned(
-                  left: 180,
-                  bottom: 50,
-                  child: SizedBox(
-                    width: 50.0,
-                    height: 50.0,
-                    child: CustomIconButton(),
-                  ),
-                ),
-                // 작은 원 3
-                Positioned(
-                  left: 260,
-                  bottom: 80,
-                  child: Container(
-                    width: 50.0,
-                    height: 50.0,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
+                    // 작은 원 3
+                    Positioned(
+                      left: 260,
+                      bottom: 80,
+                      child: Container(
+                        width: 50.0,
+                        height: 50.0,
+                        decoration: const BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/music');
+                          },
+                          icon: const Icon(Icons.music_note),
+                          iconSize: 30,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/music');
-                      },
-                      icon: const Icon(Icons.music_note),
-                      iconSize: 30,
-                      color: Colors.white,
+                    const Positioned(
+                      top: 100,
+                      left: 0,
+                      child: SelectedMissionsWidget(),
                     ),
-                  ),
+                  ],
                 ),
-                const Positioned(
-                  top: 100,
-                  left: 0,
-                  child: SelectedMissionsWidget(),
+                const Center(
+                  child: LogPage(),
                 ),
+                Center(
+                  child: RankingPage(),
+                ),
+                const Center(
+                  child: AchievementsPage(),
+                )
               ],
             ),
-            const Center(
-              child: LogPage(),
+          ),
+        ),
+    );
+  }
+
+  Future<bool> _onBackPressed() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white, // 배경색 설정
+        title: Text(
+          '앱 종료',
+          style: TextStyle(
+            color: Colors.black, // 제목 글꼴 색상
+            fontWeight: FontWeight.bold, // 제목 글꼴 굵기
+          ),
+        ),
+        content: Text(
+          '앱을 종료하시겠습니까?',
+          style: TextStyle(
+            color: Colors.grey[600], // 내용 글꼴 색상
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              '아니오',
+              style: TextStyle(
+                color: Colors.black, // 버튼 글꼴 색상
+              ),
             ),
-            Center(
-              child: RankingPage(),
+          ),
+          TextButton(
+            onPressed: () {
+              if (AudioPlayerManager.isInstanceCreated) {
+                AudioPlayerManager.instance!.dispose();
+              }
+              SystemNavigator.pop(); // Android에서 앱 종료
+            },
+            child: Text(
+              '예',
+              style: TextStyle(
+                color: Colors.black, // 버튼 글꼴 색상
+              ),
             ),
-            const Center(
-              child: AchievementsPage(),
-            )
-          ],
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // 대화상자 모서리 둥글게
         ),
       ),
-    );
+    ) ?? false;
   }
 
   @override
@@ -333,6 +388,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 }
+
 
 class SelectedMissionsWidget extends StatelessWidget {
   const SelectedMissionsWidget({super.key});
