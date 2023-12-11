@@ -12,6 +12,7 @@ import 'package:irun/music/music_page.dart';
 import 'package:irun/option/tts_setting_page.dart';
 import 'package:irun/record/firestore_service.dart';
 import 'package:irun/record/stop_record_page.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
@@ -316,25 +317,17 @@ class _MapScreenState extends State<MapScreen> {
     return "$paceMinutes'$formattedSeconds''";
   }
 
-  double calculateBMR(double weight, double height, int age, bool isMale) {
-    if (isMale) {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
-  }
-
   double calculateCalories(
       double weight, double height, int age, bool isMale, double distance) {
-    double bmr = calculateBMR(weight, height, age, isMale);
-    // 활동 계수 1.55는 중간 정도의 활동을 가정
-    double tdee = bmr * 1.55;
+    double metValue = 7.0; // 달리기의 MET 값은 일반적으로 7.0입니다.
 
-    // 러닝으로 인한 추가 칼로리 소모
-    const double runningFactor = 1.036;
-    double runningCalories = distance * weight * runningFactor;
+    // 운동 시간 (분)을 시간 (시간)으로 변환합니다.
+    double hours = distance / 60.0;
 
-    return tdee / 24 + runningCalories; // 하루 칼로리를 시간으로 나누고 러닝 칼로리를 추가
+    // 달리기로 인한 칼로리 소모 계산
+    double runningCalories = metValue * weight * hours;
+
+    return runningCalories; // 달리기로 인한 칼로리만 반환
   }
 
   @override
@@ -343,7 +336,13 @@ class _MapScreenState extends State<MapScreen> {
     String formattedDistance = '${_totalDistance.toStringAsFixed(0)} m';
     String pace =
         _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
-    final audioPlayer = AudioPlayerManager().audioPlayer;
+
+    // 러닝 탭에서 AudioPlayerManager의 인스턴스를 얻는 방법
+    AudioPlayer? audioPlayer;
+    if (AudioPlayerManager.isInstanceCreated) {
+      audioPlayer = AudioPlayerManager.instance?.audioPlayer;
+    }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -378,8 +377,11 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
           ),
-          Flexible(
-          child: Padding(
+          // MusicPlayerNavigationBar를 여기에 배치
+          if (audioPlayer != null)
+            MusicPlayerNavigationBar(audioPlayer: audioPlayer),
+
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -397,11 +399,10 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-        ),
         ],
       ),
-      bottomNavigationBar: MusicPlayerNavigationBar(audioPlayer: audioPlayer),
     );
+
   }
 
   @override

@@ -92,26 +92,20 @@ class _RoutePageState extends State<RoutePage> {
       successfulMissions[key] = value.cast<dynamic>();
     });
 
-    if (successfulMissions['시간'] != null) {
-      success1 = successfulMissions['시간']!.join(',');
-      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
-      // result를 사용하는 코드 작성
+    if (successfulMissions['거리'] != null) {
+      success1 = successfulMissions['거리']!.join(',');
     } else {
       success1 = 'X';
     }
 
-    if (successfulMissions['거리'] != null) {
-      success2 = successfulMissions['거리']!.join(',');
-      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
-      // result를 사용하는 코드 작성
+    if (successfulMissions['시간'] != null) {
+      success2 = successfulMissions['시간']!.join(',');
     } else {
       success2 = 'X';
     }
 
     if (successfulMissions['페이스'] != null) {
       success3 = successfulMissions['페이스']!.join(',');
-      // '시간' 키의 값이 null이 아닌 경우에만 join 연산을 수행하고 사용합니다.
-      // result를 사용하는 코드 작성
     } else {
       success3 = 'X';
     }

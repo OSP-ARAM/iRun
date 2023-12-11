@@ -135,25 +135,17 @@ class _StopMapScreenState extends State<StopMapScreen> {
     return zoomLevel; // 조정 가능한 값으로 조절
   }
 
-  double calculateBMR(double weight, double height, int age, bool isMale) {
-    if (isMale) {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
-  }
-
   double calculateCalories(
       double weight, double height, int age, bool isMale, double distance) {
-    double bmr = calculateBMR(weight, height, age, isMale);
-    // 활동 계수 1.55는 중간 정도의 활동을 가정
-    double tdee = bmr * 1.55;
+    double metValue = 7.0; // 달리기의 MET 값은 일반적으로 7.0입니다.
 
-    // 러닝으로 인한 추가 칼로리 소모
-    const double runningFactor = 1.036;
-    double runningCalories = distance * weight * runningFactor;
+    // 운동 시간 (분)을 시간 (시간)으로 변환합니다.
+    double hours = distance / 60.0;
 
-    return tdee / 24 + runningCalories; // 하루 칼로리를 시간으로 나누고 러닝 칼로리를 추가
+    // 달리기로 인한 칼로리 소모 계산
+    double runningCalories = metValue * weight * hours;
+
+    return runningCalories; // 달리기로 인한 칼로리만 반환
   }
 
   @override
