@@ -345,9 +345,7 @@ class _MapScreenState extends State<MapScreen> {
 
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Running'),
-      ),
+      backgroundColor: Colors.yellow,
       body: Column(
         children: [
           Expanded(
@@ -359,19 +357,19 @@ class _MapScreenState extends State<MapScreen> {
                   Text(
                     'Time: $formattedTime',
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 40, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Text(
                     'Distance: $formattedDistance',
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 40, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Text(
                     'Pace: $pace',
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 40, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -386,11 +384,15 @@ class _MapScreenState extends State<MapScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                IconButton(
+                FloatingActionButton.large(
                   onPressed: _pauseRecording,
-                  icon: const Icon(Icons.pause),
-                  iconSize: 50,
-                ),
+                    child: Icon(
+                        Icons.pause,
+                        color: Colors.white,
+                        size: 70),
+                    backgroundColor: Colors.black, // Use the appropriate color
+                    heroTag: 'resume', // Required if multiple FABs are used
+                  ),
               ],
             ),
           ),

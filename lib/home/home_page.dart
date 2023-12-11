@@ -340,28 +340,58 @@ class SelectedMissionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final missionData = Provider.of<MissionData>(context);
+    bool hasData = missionData.time != null || missionData.distance != null || missionData.pace != null;
+
+    if (!hasData) {
+      return SizedBox.shrink();
+    }
 
     return Container(
+      margin: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.yellow.withOpacity(0.7), // 노란색 배경에 약간의 투명도 적용
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('선택된 미션',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            '선택된 미션',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
           if (missionData.time != null)
-            Text('시간: ${missionData.time}',
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            _buildMissionItem(Icons.access_time, '시간: ${missionData.time}'),
           if (missionData.distance != null)
-            Text('거리: ${missionData.distance}',
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            _buildMissionItem(Icons.map, '거리: ${missionData.distance}'),
           if (missionData.pace != null)
-            Text('페이스: ${missionData.pace}',
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            _buildMissionItem(Icons.directions_run, '페이스: ${missionData.pace}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMissionItem(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(text, style: TextStyle(fontSize: 16)),
         ],
       ),
     );
   }
 }
+
+
+

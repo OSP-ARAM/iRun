@@ -17,22 +17,23 @@ class LogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 현재 로그인한 사용자의 UID를 가져옵니다.
     final User? user = auth.currentUser;
+    final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('당신의 러닝 기록', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const SizedBox(height: 20),
+            Text(
+              '당신의 러닝 기록',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+            const SizedBox(height: 10),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                // 사용자의 'Run record' 컬렉션에서 모든 문서를 불러옵니다.
                 stream: FirebaseFirestore.instance
                     .collection("Users")
                     .doc(user!.uid)
@@ -58,21 +59,25 @@ class LogPage extends StatelessWidget {
                       DateTime dateTime = timestamp.toDate();
                       String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
 
-                      return ListTile(
-                        title: Text('날짜: $formattedDate'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('거리: ${data['distance']} km'),
-                            Text('시간: ${data['duration']}'),
-                            TextButton(
-                              onPressed: () => _viewRoute(context, data),
-                              child: const Text('루트 보기'),
-                            ),
-                          ],
+                      return Card(
+                        color: Colors.yellow,
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                        child: ListTile(
+                          leading: Icon(Icons.run_circle, color: Colors.black),
+                          title: Text('날짜: $formattedDate', style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('거리: ${data['distance']} km'),
+                              Text('시간: ${data['duration']}'),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios),
+                            onPressed: () => _viewRoute(context, data),
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        isThreeLine: true,
                       );
                     }).toList(),
                   );

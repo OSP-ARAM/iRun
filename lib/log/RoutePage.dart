@@ -112,249 +112,172 @@ class _RoutePageState extends State<RoutePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          '기록 상세',
-        ),
+        title: const Text('상세 기록'),
+        backgroundColor: Colors.yellow, // AppBar 색상 변경
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '${formattedDateTime}', // 원하는 텍스트로 변경
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 300,
-            child: GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                rootBundle
-                    .loadString('assets/map/mapstyle.json')
-                    .then((String mapStyle) {
-                  controller.setMapStyle(mapStyle);
-                  _mapController = controller;
-                });
-              },
-              initialCameraPosition: CameraPosition(
-                target: polylineCoordinates.isNotEmpty
-                    ? polylineCoordinates.first
-                    : const LatLng(0, 0),
-                zoom: 14,
-              ),
-              polylines: _polylines,
-              markers: _markers,
-              myLocationEnabled: false,
-              zoomControlsEnabled: false,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      '${widget.routeData['duration'].substring(1)}', // 원하는 두 번째 텍스트로 변경
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 기존의 경로 정보 표시 카드
+            Card(
+              elevation: 4,
+              margin: const EdgeInsets.all(8),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Text(
+                      '${formattedDateTime}',
                       style: const TextStyle(
-                        fontSize: 17,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '시간', // 원하는 첫 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 13,
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 300, // Google Map의 높이 지정
+                      child: GoogleMap(
+                        onMapCreated: (GoogleMapController controller) {
+                          rootBundle
+                              .loadString('assets/map/mapstyle.json')
+                              .then((String mapStyle) {
+                            controller.setMapStyle(mapStyle);
+                            _mapController = controller;
+                          });
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: polylineCoordinates.isNotEmpty
+                              ? polylineCoordinates.first
+                              : const LatLng(0, 0),
+                          zoom: 14,
+                        ),
+                        polylines: _polylines,
+                        markers: _markers,
+                        myLocationEnabled: false,
+                        zoomControlsEnabled: false,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      '${widget.routeData['pace']}', // 원하는 두 번째 텍스트로 변경
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 10),
+                    // 시간, 페이스, 거리 정보 표시
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildInfoCard('시간', '${widget.routeData['duration'].substring(1)}', Icons.access_time),
+                        _buildInfoCard('페이스', '${widget.routeData['pace']}', Icons.directions_run),
+                      ],
                     ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '페이스', // 원하는 첫 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
+                    const SizedBox(height: 10),
+
+                    // 두 번째 줄: 거리, 칼로리 정보
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildInfoCard('거리', '${widget.routeData['distance']}km', Icons.map),
+                        _buildInfoCard('칼로리', '${widget.routeData['caloriesBurned']}kcal', Icons.local_fire_department),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      '${widget.routeData['distance']}km', // 원하는 두 번째 텍스트로 변경
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '거리', // 원하는 첫 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      '${widget.routeData['caloriesBurned']}', // 원하는 두 번째 텍스트로 변경
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '칼로리', // 원하는 첫 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const Center( // "성공한 미션"을 Center 위젯으로 감싸서 중앙 정렬
-            child: Padding(
-              padding: EdgeInsets.all(10),
-              child: Text(
-                '성공한 미션',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  ],
                 ),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // 성공한 미션 표시 카드
+            Card(
+              elevation: 4,
+              margin: const EdgeInsets.all(8),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '성공한 미션',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // 첫 번째 줄: 거리, 시간 정보
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMissionCard('거리', success1, Icons.map),
+                        _buildMissionCard('시간', success2, Icons.access_time),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // 두 번째 줄: 페이스 정보
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMissionCard('페이스', success3, Icons.directions_run),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // 추가적인 위젯들...
+          ],
+        ),
+      ),
+    );
+  }
+
+// 정보를 표시하는 컬럼을 위한 도우미 메서드
+  Widget _buildInfoCard(String label, String value, IconData icon) {
+    return Expanded( // 카드가 Row의 전체 너비를 채우도록 확장
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.all(4), // 마진 추가
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: const Text(
-                      '거리', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$success1',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+              Icon(icon, color: Colors.black),
+              const SizedBox(height: 8), // 아이콘과 텍스트 사이 간격
+              Text(
+                value,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: const Text(
-                      '시간', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$success2',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(5),
-                    child: const Text(
-                      '페이스', // 원하는 두 번째 텍스트로 변경
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$success3',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                label,
+                style: const TextStyle(fontSize: 14),
               ),
             ],
           ),
-          // 여기에 추가적인 위젯을 배치할 수 있습니다.
-        ],
+        ),
+      ),
+    );
+  }
+
+// 성공한 미션을 표시하는 컬럼을 위한 도우미 메서드
+  Widget _buildMissionCard(String label, String value, IconData icon) {
+    return Expanded( // 카드가 Row의 전체 너비를 채우도록 확장
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.all(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.black),
+              const SizedBox(height: 8), // 아이콘과 텍스트 사이 간격
+              Text(
+                value,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -364,6 +287,8 @@ class _RoutePageState extends State<RoutePage> {
     _mapController.dispose();
     super.dispose();
   }
+  }
 
-}
+
+
 

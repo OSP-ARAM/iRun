@@ -41,22 +41,25 @@ class AudioPlayerManager {
             id: '0',
             title: 'Super Shy',
             artist: 'NewJeans',
+            artUri: Uri.parse('https://i.namu.wiki/i/Knu15tihmUyeZaTd9CMftgs5x2cbD9Q4lXz28j5YF4EkRGreeP5PLU339jxOZbC-Mk71mkr-8a9OVxraySbdUUVTEj-y2MHlQeif58GdvICPfbm4JuXMkgoYSysl-Wpw87eqmKBJ08FtPtYyXZqiEA.webp')
           ),
         ),
         AudioSource.uri(
           Uri.parse('asset:///assets/music/song2.ogg'),
           tag: MediaItem(
             id: '1',
-            title: '너의 번호를 누르고',
-            artist: '안녕',
+            title: '질풍가도',
+            artist: '유정석',
+            artUri: Uri.parse('https://imgproxy.mapia.io/v3/9XKgUfakRRq2IlajQkTyWxqbs-3We0x2/g:ce/rs:fit:967:1395:true/aHR0cHM6Ly9tZnMu/cGQubWFwaWEuaW8v/cHVibGljL2ZpbGUv/NGUyNDExNDVhM2My/MmJiM2JkM2JiYTY5/MTVhZTg3MzgvZG93/bmxvYWQ_U2Vydmlj/ZS1Qcm92aWRlcj1t/bXM.jpg')
           ),
         ),
         AudioSource.uri(
           Uri.parse('asset:///assets/music/song3.ogg'),
           tag: MediaItem(
-            id: '2',
-            title: 'Song3',
-            artist: 'LG',
+              id: '2',
+              title: '너의 번호를 누르고',
+              artist: '안녕',
+              artUri: Uri.parse('https://image.bugsm.co.kr/album/images/500/9589/958964.jpg')
           ),
         ),
       ],
@@ -131,8 +134,8 @@ class _MusicPlayerPageState extends State<MusicPlayerPage> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [Color(0xFF144771), Color(0xFF071A2C)],
+            begin: Alignment.bottomLeft,
+            colors: [Colors.yellow, Colors.grey],//[Color(0xFF144771), Color(0xFF071A2C)],
           ),
         ),
         child: Column(
@@ -326,6 +329,7 @@ class _MusicPlayerNavigationBarState extends State<MusicPlayerNavigationBar> {
         return Offstage(
           offstage: !instanceExists,
           child: BottomAppBar(
+            color: Colors.yellow, // 배경 색을 노란색으로 설정
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 0.0), // 패딩 조정
               child: Column(

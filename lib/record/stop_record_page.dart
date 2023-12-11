@@ -153,132 +153,139 @@ class _StopMapScreenState extends State<StopMapScreen> {
   @override
   Widget build(BuildContext context) {
     String formattedDistance = (widget.totalDistance / 1000).toStringAsFixed(2);
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double statsHeight = screenHeight *
+        0.2; // Adjust the stats section height as needed
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Running'),
-      ),
-      body: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-        double height = MediaQuery.of(context).size.height * 1;
-        return Column(
-          children: [
-            Container(
-                height: height * 0.2, // 컨테이너 높이 조정
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Time, Distance, Pace, Calories를 각각 Row로 표시
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          '시간: ${widget.formattedTime}',
-                          style: const TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '거리: $formattedDistance km',
-                          style: const TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          '페이스: ${widget.pace}',
-                          style: const TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '칼로리: ${caloriesBurned.toStringAsFixed(1)} kcal',
-                          style: const TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            SizedBox(
-              height: height * 0.5,
-              child: GoogleMap(
-                onMapCreated: (GoogleMapController controller) {
-                  rootBundle
-                      .loadString('assets/map/mapstyle.json')
-                      .then((String mapStyle) {
-                    controller.setMapStyle(mapStyle);
-                    _controller = controller;
+      body: Column(
+        children: [
+          // Google Map container
+          Expanded(
+            flex: 5,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 10,
+              ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: GoogleMap(
+                  onMapCreated: (GoogleMapController controller) {
+                    rootBundle
+                        .loadString('assets/map/mapstyle.json')
+                        .then((String mapStyle) {
+                      controller.setMapStyle(mapStyle);
+                      _controller = controller;
 
-                    // 경로의 초기 확대 수준 설정
-                    double initialZoom = _calculateZoomLevel(widget.routeData);
+                      // 경로의 초기 확대 수준 설정
+                      double initialZoom = _calculateZoomLevel(widget.routeData);
 
-                    controller.moveCamera(
-                      CameraUpdate.newLatLngZoom(
-                        LatLng(
-                          widget.routeData.last['latitude']!,
-                          widget.routeData.last['longitude']!,
+                      controller.moveCamera(
+                        CameraUpdate.newLatLngZoom(
+                          LatLng(
+                            widget.routeData.last['latitude']!,
+                            widget.routeData.last['longitude']!,
+                          ),
+                          initialZoom,
                         ),
-                        initialZoom,
-                      ),
-                    );
-                  });
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                    widget.routeData.last['latitude']!,
-                    widget.routeData.last['longitude']!,
+                      );
+                    });
+                  },
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                      widget.routeData.last['latitude']!,
+                      widget.routeData.last['longitude']!,
+                    ),
+                    zoom: 18.0, // 초기 확대 수준 설정
                   ),
-                  zoom: 18.0, // 초기 확대 수준 설정
+                  markers: Set.from(_markers),
+                  polylines: Set.from([
+                    Polyline(
+                      polylineId: const PolylineId("runningRoute"),
+                      color: Colors.blue,
+                      points: widget.routeData
+                          .map((data) =>
+                          LatLng(data['latitude']!, data['longitude']!))
+                          .toList(),
+                    ),
+                  ]),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
                 ),
-                markers: Set.from(_markers),
-                polylines: Set.from([
-                  Polyline(
-                    polylineId: const PolylineId("runningRoute"),
-                    color: Colors.blue,
-                    points: widget.routeData
-                        .map((data) =>
-                            LatLng(data['latitude']!, data['longitude']!))
-                        .toList(),
-                  ),
-                ]),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
               ),
             ),
-            const SizedBox(width: 16),
-            Row(
+          ),
+          // Stats container
+          Container(
+            height: statsHeight,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16.0, vertical: 4.0),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  height: height * 0.15,
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context, true);
-                    },
-                    child: const Text('재개'),
-                  ),
-                ), // 버튼 사이 간격 조절을 위한 SizedBox 사용
-                Container(
-                  height: height * 0.15,
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _stopRecording(context);
-                    },
-                    child: const Text('종료'),
-                  ),
+                // Time and Distance
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _StatsBox(title: '시간', value: widget.formattedTime),
+                    _StatsBox(title: '거리', value: '$formattedDistance km'),
+                  ],
+                ),
+                // Pace and Calories
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _StatsBox(title: '      페이스', value: '    ' + widget.pace),
+                    _StatsBox(title: '      칼로리',
+                        value: '    ${caloriesBurned.toStringAsFixed(1)} kcal'),
+                  ],
                 ),
               ],
             ),
-          ],
-        );
-      }),
+          ),
+          // Buttons container
+          Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Resume button
+                FloatingActionButton.large(
+                  onPressed: () {
+                    Navigator.pop(context, true); // Modify as necessary for your logic
+                  },
+                  child: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 70),
+                  backgroundColor: Colors.black, // Use the appropriate color
+                  heroTag: 'resume', // Required if multiple FABs are used
+                ),
+                // Stop button
+                FloatingActionButton.large(
+                  onPressed: () {
+                    _stopRecording(context);
+                  },
+                  child: Icon(
+                      Icons.stop,
+                      color: Colors.black,
+                      size: 70),
+                  backgroundColor: Colors.yellow, // Use the appropriate color
+                  heroTag: 'stop', // Required if multiple FABs are used
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -287,5 +294,57 @@ class _StopMapScreenState extends State<StopMapScreen> {
     _positionStreamSubscription?.cancel();
     _timer?.cancel();
     super.dispose();
+  }
+}
+
+class _StatsBox extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _StatsBox({
+    Key? key,
+    required this.title,
+    required this.value,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 4),
+        Text(
+          title,
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+}
+
+// Helper widget for control buttons
+class _ControlButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _ControlButton({
+    Key? key,
+    required this.label,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(label),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue, // Change color to match your design
+        minimumSize: Size(100, 60), // Change size to match your design
+      ),
+    );
   }
 }
