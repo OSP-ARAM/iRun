@@ -27,11 +27,11 @@ Future<User?> signInWithGoogle() async {
 
       final User? currentUser = auth.currentUser;
       assert(user.uid == currentUser?.uid);
-      FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
-        'displayName': user.displayName,
-        'email': user.email,
-        'photoURL': user.photoURL,
-      });
+      await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+        'displayName': user.displayName ?? '',
+        'email': user.email ?? '',
+        'photoURL': user.photoURL ?? '',
+      }, SetOptions(merge: true));
 
       print('Google SignIn Succeeded: ${user.uid}');
       return user;
