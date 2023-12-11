@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:irun/ranking/ranking_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'Achievements/achievement_provider.dart';
@@ -36,7 +37,8 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MissionData()),
-        ChangeNotifierProvider(create: (_) => AchievementsProvider())
+        ChangeNotifierProvider(create: (_) => AchievementsProvider()),
+        ChangeNotifierProvider(create: (_) => RankingProvider())
       ],
       child: const MaterialApp(home: MyApp()),
     ),
@@ -54,6 +56,10 @@ class MyApp extends StatelessWidget {
       achievementsProvider.initializeDatabase();
       achievementsProvider.isInitialized = true;
     }
+    final rankingProvider = Provider.of<RankingProvider>(context, listen: false);
+    if (!rankingProvider.isInitialLoadDone) {
+      rankingProvider.loadRankingData();
+    }
 
     return MaterialApp(
       title: 'Flutter Demo',
@@ -65,7 +71,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => LoginPage(),
         '/home': (context) => const MyHomePage(),
         '/music': (context) => const MusicPlayerPage(),
-        '/ranking': (context) => const RankingPage(),
+        '/ranking': (context) => RankingPage(),
         '/option': (context) => const OptionPage(),
         '/record': (context) => const MapScreen(),
         '/log': (context) => const LogPage(),

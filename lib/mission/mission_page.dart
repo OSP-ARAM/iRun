@@ -285,4 +285,11 @@ class MissionData extends ChangeNotifier {
     _pace = newPace;
     notifyListeners();
   }
+
+  void reset() {
+    _time = null;
+    _distance = null;
+    _pace = null;
+    notifyListeners();
+  }
 }

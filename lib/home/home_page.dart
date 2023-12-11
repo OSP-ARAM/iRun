@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:irun/log/log_page.dart';
 import 'package:irun/ranking/ranking_page.dart';
 import 'package:irun/Achievements/achievements_page.dart';
+import '../Achievements/achievement_provider.dart';
 import 'weather_model.dart';
 import 'weather_service.dart';
 
@@ -148,6 +149,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final achievementsProvider =
+    Provider.of<AchievementsProvider>(context, listen: false);
+    if (!achievementsProvider.isInitialized) {
+      achievementsProvider.initializeDatabase();
+      achievementsProvider.isInitialized = true;
+    }
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -308,7 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const Center(
               child: LogPage(),
             ),
-            const Center(
+            Center(
               child: RankingPage(),
             ),
             const Center(
