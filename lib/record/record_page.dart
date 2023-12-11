@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
+import 'package:irun/music/music_page.dart';
 import 'package:irun/option/tts_setting_page.dart';
 import 'package:irun/record/firestore_service.dart';
 import 'package:irun/record/stop_record_page.dart';
@@ -342,6 +343,7 @@ class _MapScreenState extends State<MapScreen> {
     String formattedDistance = '${_totalDistance.toStringAsFixed(0)} m';
     String pace =
         _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
+    final audioPlayer = AudioPlayerManager().audioPlayer;
 
     return Scaffold(
       appBar: AppBar(
@@ -376,7 +378,8 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
           ),
-          Padding(
+          Flexible(
+          child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -394,8 +397,10 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
+        ),
         ],
       ),
+      bottomNavigationBar: MusicPlayerNavigationBar(audioPlayer: audioPlayer),
     );
   }
 
