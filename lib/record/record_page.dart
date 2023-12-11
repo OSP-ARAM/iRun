@@ -386,11 +386,6 @@ class _MapScreenState extends State<MapScreen> {
                   icon: const Icon(Icons.pause),
                   iconSize: 50,
                 ),
-                IconButton(
-                  onPressed: _stopRecording,
-                  icon: const Icon(Icons.stop),
-                  iconSize: 50,
-                ),
               ],
             ),
           ),

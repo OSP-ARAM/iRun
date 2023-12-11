@@ -103,6 +103,8 @@ class _StopMapScreenState extends State<StopMapScreen> {
       missionData: missionData,
       caloriesBurned: caloriesBurned,
     );
+    missionData.reset();
+
     Provider.of<AchievementsProvider>(context, listen: false)
         .refreshMissionData();
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
