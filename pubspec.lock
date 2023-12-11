@@ -97,7 +97,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.18"
-<<<<<<< Updated upstream
   audio_video_progress_bar:
     dependency: "direct main"
     description:
@@ -106,8 +105,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-=======
->>>>>>> Stashed changes
   boolean_selector:
     dependency: transitive
     description:
@@ -691,7 +688,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-<<<<<<< Updated upstream
   octo_image:
     dependency: transitive
     description:
@@ -700,8 +696,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-=======
->>>>>>> Stashed changes
   package_config:
     dependency: transitive
     description:
@@ -719,11 +713,7 @@ packages:
     source: hosted
     version: "1.8.3"
   path_provider:
-<<<<<<< Updated upstream
     dependency: "direct main"
-=======
-    dependency: transitive
->>>>>>> Stashed changes
     description:
       name: path_provider
       sha256: a1aa8aaa2542a6bc57e381f132af822420216c80d4781f7aa085ca3229208aaa
@@ -865,17 +855,6 @@ packages:
       sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< Updated upstream
-=======
-    version: "3.2.1"
-  rxdart:
-    dependency: transitive
-    description:
-      name: rxdart
-      sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
-      url: "https://pub.dev"
-    source: hosted
->>>>>>> Stashed changes
     version: "0.27.7"
   sanitize_html:
     dependency: transitive
