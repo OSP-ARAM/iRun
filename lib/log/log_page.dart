@@ -31,7 +31,7 @@ class LogPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const SizedBox(height: 20),
+            const SizedBox(height: 0),
             const Text(
               '당신의 러닝 기록',
               style: TextStyle(
