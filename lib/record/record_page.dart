@@ -56,12 +56,17 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _pauseRecording() async {
     setState(() {
-      isrunningflag = false; // 러닝 재개
+      isrunningflag = false;
     });
 
     _stopwatch.stop();
     _positionStreamSubscription?.pause();
     _timer?.cancel();
+
+    // TTS가 설정되었는지 확인하고, 음성 메시지 재생
+    if (isSetted && tts != null) {
+      await tts.speak('러닝이 일시 정지되었습니다.');
+    }
 
     // 경로 데이터 생성
     List<Map<String, double>> routeData = _markers.map((marker) {
@@ -90,6 +95,11 @@ class _MapScreenState extends State<MapScreen> {
 
     if (result == true) {
       resumeRunning();
+
+      isSetted = await TTSSettingState.getIsSetted();
+      if (isSetted && tts != null) {
+        await tts.speak('러닝을 재개합니다.');
+      }
     }
   }
 
@@ -203,7 +213,7 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     double caloriesBurned = calculateCalories(
-        weight!, height!, age!, gender, _totalDistance / 1000); // m를 km로 변환
+        weight!, height!, age!, gender, _totalDistance / 1000, _stopwatch.elapsedMilliseconds); // m를 km로 변환
 
     // FirestoreService를 사용하여 데이터 저장
     final missionData = Provider.of<MissionData>(context, listen: false);
@@ -300,11 +310,16 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   String _calculatePace(double distance, int milliseconds) {
-    if (distance == 0 || milliseconds == 0) {
-      return "0'00''";
-    }
-    double minutes = milliseconds / 60000.0;
+    // 거리를 킬로미터로 변환
     double distanceKm = distance / 1000.0;
+
+    // 거리가 1km 미만이거나 시간이 0이면 '--' 반환
+    if (distanceKm < 1 || milliseconds == 0) {
+      return "-'--''";
+    }
+
+    // 거리가 1km 이상이면 페이스 계산
+    double minutes = milliseconds / 60000.0;
     double pace = minutes / distanceKm;
 
     // 분과 초로 분리
@@ -317,23 +332,44 @@ class _MapScreenState extends State<MapScreen> {
     return "$paceMinutes'$formattedSeconds''";
   }
 
-  double calculateCalories(
-      double weight, double height, int age, bool isMale, double distance) {
-    double metValue = 7.0; // 달리기의 MET 값은 일반적으로 7.0입니다.
+  double calculateCalories(double weight, double height, int age, bool isMale, double distance, int timeInMilliseconds) {
+    // 운동 시간 (시간) 계산: 밀리초를 시간으로 변환
+    double hours = (timeInMilliseconds / 1000.0) / 3600.0;
 
-    // 운동 시간 (분)을 시간 (시간)으로 변환합니다.
-    double hours = distance / 60.0;
+    // 평균 속도 계산 (km/h)
+    double speed = distance / hours;
+
+    // MET 값 조정: 속도에 따라 MET 값 조정
+    double metValue;
+    if (speed < 8.0) {
+      metValue = 6.0; // 느린 속도
+    } else if (speed < 12.0) {
+      metValue = 8.3; // 중간 속도
+    } else {
+      metValue = 12.8; // 빠른 속도
+    }
 
     // 달리기로 인한 칼로리 소모 계산
     double runningCalories = metValue * weight * hours;
 
-    return runningCalories; // 달리기로 인한 칼로리만 반환
+    return runningCalories; // 달리기로 인한 칼로리 반환
+  }
+
+
+  String _formatRunningTime(int milliseconds) {
+    int seconds = (milliseconds / 1000).floor();
+    int minutes = (seconds / 60).floor();
+
+    String minutesStr = minutes.toString();
+    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
+
+    return '$minutesStr:$secondsStr';
   }
 
   @override
   Widget build(BuildContext context) {
     String formattedTime = _formatTime(_stopwatch.elapsedMilliseconds);
-    String formattedDistance = '${_totalDistance.toStringAsFixed(0)} m';
+    String formattedDistance = '${(_totalDistance / 1000).toStringAsFixed(2)} km';
     String pace =
         _calculatePace(_totalDistance, _stopwatch.elapsedMilliseconds);
 
@@ -347,53 +383,57 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       backgroundColor: Colors.yellow,
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Time: $formattedTime',
-                    style: const TextStyle(
-                        fontSize: 40, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Distance: $formattedDistance',
-                    style: const TextStyle(
-                        fontSize: 40, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Pace: $pace',
-                    style: const TextStyle(
-                        fontSize: 40, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // MusicPlayerNavigationBar를 여기에 배치
-          if (audioPlayer != null)
-            MusicPlayerNavigationBar(audioPlayer: audioPlayer),
-
+          // 상단에 시간과 페이스를 가로로 나란히 배치하고 위치를 아래로 조정
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(top: 60.0), // 상단 패딩 증가
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                FloatingActionButton.large(
-                  onPressed: _pauseRecording,
-                    child: Icon(
-                        Icons.pause,
-                        color: Colors.white,
-                        size: 70),
-                    backgroundColor: Colors.black, // Use the appropriate color
-                    heroTag: 'resume', // Required if multiple FABs are used
-                  ),
+                Text(
+                  '시간: ${_formatRunningTime(_stopwatch.elapsedMilliseconds)}',
+                  style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '페이스: $pace',
+                  style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold),
+                ),
               ],
+            ),
+          ),
+
+          // 거리 표시
+          Expanded(
+            child: Center(
+              child: Text(
+                '$formattedDistance',
+                style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+
+          // MusicPlayerNavigationBar (네비게이션 바) 배치
+          if (audioPlayer != null)
+            MusicPlayerNavigationBar(audioPlayer: audioPlayer),
+
+          // 플로팅 액션 버튼 배치
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FloatingActionButton.large(
+              onPressed: _pauseRecording,
+              child: const Icon(
+                  Icons.pause,
+                  color: Colors.white,
+                  size: 70),
+              backgroundColor: Colors.black,
+              heroTag: 'pause',
             ),
           ),
         ],

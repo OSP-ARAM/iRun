@@ -11,9 +11,10 @@ import 'package:irun/Achievements/achievement_provider.dart';
 import 'package:irun/log/log_provider.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
-import 'package:irun/ranking/ranking_provider.dart';
 import 'package:irun/record/firestore_service.dart';
 import 'package:provider/provider.dart';
+import 'package:irun/option/tts_setting_page.dart';
+import 'package:irun/ranking/ranking_provider.dart';
 
 class StopMapScreen extends StatefulWidget {
   final String formattedTime;
@@ -43,6 +44,7 @@ class StopMapScreen extends StatefulWidget {
 class _StopMapScreenState extends State<StopMapScreen> {
   final User? user = auth.currentUser;
 
+
   GoogleMapController? _controller;
   final List<Marker> _markers = [];
   final Stopwatch _stopwatch = Stopwatch();
@@ -50,6 +52,7 @@ class _StopMapScreenState extends State<StopMapScreen> {
 
   FlutterTts tts = FlutterTts();
   bool isSetted = false;
+
 
   Timer? _timer;
 
@@ -93,6 +96,11 @@ class _StopMapScreenState extends State<StopMapScreen> {
     _stopwatch.stop();
     _positionStreamSubscription?.cancel();
     _timer?.cancel();
+
+    isSetted = await TTSSettingState.getIsSetted();
+    if (isSetted && tts != null) {
+      await tts.speak('러닝을 종료합니다. 총 ${widget.totalDistance.toStringAsFixed(1)}km 달렸습니다.');
+    }
 
     // FirestoreService를 사용하여 데이터 저장
     final missionData = Provider.of<MissionData>(context, listen: false);
@@ -325,30 +333,6 @@ class _StatsBox extends StatelessWidget {
           style: TextStyle(fontSize: 16),
         ),
       ],
-    );
-  }
-}
-
-// Helper widget for control buttons
-class _ControlButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-
-  const _ControlButton({
-    Key? key,
-    required this.label,
-    required this.onPressed,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(label),
-      style: ElevatedButton.styleFrom(
-        primary: Colors.blue, // Change color to match your design
-        minimumSize: Size(100, 60), // Change size to match your design
-      ),
     );
   }
 }
