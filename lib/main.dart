@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:irun/log/log_provider.dart';
 import 'package:irun/ranking/ranking_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +39,8 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => MissionData()),
         ChangeNotifierProvider(create: (_) => AchievementsProvider()),
-        ChangeNotifierProvider(create: (_) => RankingProvider())
+        ChangeNotifierProvider(create: (_) => RankingProvider()),
+  ChangeNotifierProvider(create: (_) => LogProvider()),
       ],
       child: const MaterialApp(home: MyApp()),
     ),
@@ -60,7 +62,10 @@ class MyApp extends StatelessWidget {
     if (!rankingProvider.isInitialLoadDone) {
       rankingProvider.loadRankingData();
     }
-
+    final logProvider = Provider.of<LogProvider>(context,listen: false);
+    if(!logProvider.isDataLoaded){
+      logProvider.fetchAndCacheRecords();
+    }
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

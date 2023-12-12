@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:irun/Achievements/achievement_provider.dart';
+import 'package:irun/log/log_provider.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
 import 'package:irun/record/firestore_service.dart';
@@ -107,6 +108,7 @@ class _StopMapScreenState extends State<StopMapScreen> {
 
     Provider.of<AchievementsProvider>(context, listen: false)
         .refreshMissionData();
+    Provider.of<LogProvider>(context, listen: false).fetchAndCacheRecords();
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
