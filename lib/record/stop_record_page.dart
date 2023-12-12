@@ -11,9 +11,10 @@ import 'package:irun/Achievements/achievement_provider.dart';
 import 'package:irun/log/log_provider.dart';
 import 'package:irun/login/login_api.dart';
 import 'package:irun/mission/mission_page.dart';
-import 'package:irun/option/tts_setting_page.dart';
 import 'package:irun/record/firestore_service.dart';
 import 'package:provider/provider.dart';
+import 'package:irun/option/tts_setting_page.dart';
+import 'package:irun/ranking/ranking_provider.dart';
 
 class StopMapScreen extends StatefulWidget {
   final String formattedTime;
@@ -117,6 +118,7 @@ class _StopMapScreenState extends State<StopMapScreen> {
     Provider.of<AchievementsProvider>(context, listen: false)
         .refreshMissionData();
     Provider.of<LogProvider>(context, listen: false).fetchAndCacheRecords();
+    Provider.of<RankingProvider>(context, listen: false).loadRankingData(forceLoad: true);
     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 

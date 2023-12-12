@@ -36,9 +36,11 @@ Color getTierColor(String tier) {
 }
 
 class RankingPage extends StatelessWidget {
+  const RankingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final rankingProvider = Provider.of<RankingProvider>(context, listen: false);
+    final rankingProvider = Provider.of<RankingProvider>(context);
     if (!rankingProvider.isInitialLoadDone) {
       rankingProvider.loadRankingData();
     }
@@ -48,12 +50,12 @@ class RankingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('시즌 2023', style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => rankingProvider.loadRankingData(forceLoad: false),
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.refresh),
+        //     onPressed: () => rankingProvider.loadRankingData(forceLoad: true),
+        //   ),
+        // ],
       ),
       body: rankingProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
