@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +31,6 @@ class _RoutePageState extends State<RoutePage> {
     super.initState();
     _createPolylines();
   }
-
 
   void _createPolylines() {
     List<dynamic> coordinatesListDynamic = widget.routeData['route'];
@@ -120,6 +121,7 @@ class _RoutePageState extends State<RoutePage> {
           children: [
             // 기존의 경로 정보 표시 카드
             Card(
+              color: Colors.white,
               elevation: 4,
               margin: const EdgeInsets.all(8),
               child: Padding(
@@ -138,11 +140,15 @@ class _RoutePageState extends State<RoutePage> {
                       height: 300, // Google Map의 높이 지정
                       child: GoogleMap(
                         onMapCreated: (GoogleMapController controller) {
-                          rootBundle
-                              .loadString('assets/map/mapstyle.json')
-                              .then((String mapStyle) {
+                          _mapController = controller;
+                          rootBundle.loadString('assets/map/mapstyle.json').then((String mapStyle) {
                             controller.setMapStyle(mapStyle);
-                            _mapController = controller;
+
+                            if (polylineCoordinates.isNotEmpty) {
+                              LatLngBounds bounds = _boundsFromLatLngList(polylineCoordinates);
+                              CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
+                              controller.animateCamera(cameraUpdate);
+                            }
                           });
                         },
                         initialCameraPosition: CameraPosition(
@@ -182,6 +188,7 @@ class _RoutePageState extends State<RoutePage> {
             ),
             // 성공한 미션 표시 카드
             Card(
+              color: Colors.white,
               elevation: 4,
               margin: const EdgeInsets.all(8),
               child: Padding(
@@ -228,6 +235,7 @@ class _RoutePageState extends State<RoutePage> {
   Widget _buildInfoCard(String label, String value, IconData icon) {
     return Expanded( // 카드가 Row의 전체 너비를 채우도록 확장
       child: Card(
+        color: Colors.white,
         elevation: 2,
         margin: const EdgeInsets.all(4), // 마진 추가
         child: Padding(
@@ -257,6 +265,7 @@ class _RoutePageState extends State<RoutePage> {
   Widget _buildMissionCard(String label, String value, IconData icon) {
     return Expanded( // 카드가 Row의 전체 너비를 채우도록 확장
       child: Card(
+        color: Colors.white,
         elevation: 2,
         margin: const EdgeInsets.all(4),
         child: Padding(
@@ -289,6 +298,18 @@ class _RoutePageState extends State<RoutePage> {
   }
   }
 
-
+// 모든 LatLng 객체를 포함하는 LatLngBounds를 생성하는 함수
+LatLngBounds _boundsFromLatLngList(List<LatLng> list) {
+  double x0, x1, y0, y1;
+  x0 = x1 = list[0].latitude;
+  y0 = y1 = list[0].longitude;
+  for (LatLng latLng in list) {
+    if (latLng.latitude > x1) x1 = latLng.latitude;
+    if (latLng.latitude < x0) x0 = latLng.latitude;
+    if (latLng.longitude > y1) y1 = latLng.longitude;
+    if (latLng.longitude < y0) y0 = latLng.longitude;
+  }
+  return LatLngBounds(southwest: LatLng(x0, y0), northeast: LatLng(x1, y1));
+}
 
 

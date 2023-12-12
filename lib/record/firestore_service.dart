@@ -45,9 +45,20 @@ class FirestoreService {
           totalDistance, stopwatch.elapsedMilliseconds);
 
       // 페이스 문자열을 분과 초로 분리
-      List<String> paceParts = calculatedPace.split("'");
-      int paceMinutes = int.parse(paceParts[0]); // 분
-      int paceSeconds = int.parse(paceParts[1].replaceAll("''", "")); // 초
+
+      int paceMinutes;
+      int paceSeconds;
+
+      if (calculatedPace == "-'--''") {
+        paceMinutes = -1; // 유효하지 않은 값으로 설정
+        paceSeconds = -1; // 유효하지 않은 값으로 설정
+      } else {
+        List<String> paceParts = calculatedPace.split("'");
+        paceMinutes = int.parse(paceParts[0]);
+        paceSeconds = int.parse(paceParts[1].replaceAll("''", ""));
+      }
+
+
 
       //칼로리 string으로 변환
 
@@ -372,7 +383,7 @@ class FirestoreService {
       }
 
       //pace 630
-      if (missionData.pace == '630') {
+      if (missionData.pace == '630' && paceMinutes >= 0 && paceSeconds >= 0) {
         String lottieFileName = "pace630";
         String state;
         int num;
@@ -423,7 +434,7 @@ class FirestoreService {
       }
 
       //pace 600
-      if (missionData.pace == '600') {
+      if (missionData.pace == '600' && paceMinutes >= 0 && paceSeconds >= 0) {
         String lottieFileName = "pace600";
         String state;
         int num;
@@ -474,7 +485,7 @@ class FirestoreService {
       }
 
       //pace 550
-      if (missionData.pace == '550') {
+      if (missionData.pace == '550' && paceMinutes >= 0 && paceSeconds >= 0) {
         String lottieFileName = "pace550";
         String state;
         int num;
@@ -545,11 +556,16 @@ class FirestoreService {
   }
 
   static String _calculatePace(double distance, int milliseconds) {
-    if (distance == 0 || milliseconds == 0) {
-      return "0'00''";
-    }
-    double minutes = milliseconds / 60000.0;
+    // 거리를 킬로미터로 변환
     double distanceKm = distance / 1000.0;
+
+    // 거리가 1km 미만이거나 시간이 0이면 '--' 반환
+    if (distanceKm < 1 || milliseconds == 0) {
+      return "-'--''";
+    }
+
+    // 거리가 1km 이상이면 페이스 계산
+    double minutes = milliseconds / 60000.0;
     double pace = minutes / distanceKm;
 
     // 분과 초로 분리
