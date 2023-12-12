@@ -24,9 +24,8 @@ class RankingProvider with ChangeNotifier {
     if (_isInitialLoadDone && !forceLoad) {
       return;
     }
-
+print('ho');
     _isLoading = true;
-    notifyListeners();
 
     List<Map<String, dynamic>> userProfiles = await _getAllUserProfiles();
     List<Future<double>> scoreFutures = userProfiles.map((userProfile) {

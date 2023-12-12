@@ -104,9 +104,9 @@ class _AchievementsPageState extends State<AchievementsPage>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       _buildCategory(
-                          "거리 km", distanceData, _distanceController),
+                          "거리 (km)", distanceData, _distanceController),
                       const SizedBox(height: 16.0),
-                      _buildCategory("시간 min", timeData, _timeController),
+                      _buildCategory("시간 (min)", timeData, _timeController),
                       const SizedBox(height: 16.0),
                       _buildCategory("페이스", paceData, _paceController),
                     ],

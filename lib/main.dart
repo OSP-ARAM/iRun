@@ -40,7 +40,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => MissionData()),
         ChangeNotifierProvider(create: (_) => AchievementsProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
-  ChangeNotifierProvider(create: (_) => LogProvider()),
+        ChangeNotifierProvider(create: (_) => LogProvider()),
       ],
       child: const MaterialApp(home: MyApp()),
     ),
@@ -58,15 +58,17 @@ class MyApp extends StatelessWidget {
       achievementsProvider.initializeDatabase();
       achievementsProvider.isInitialized = true;
     }
-    final rankingProvider = Provider.of<RankingProvider>(context, listen: false);
+    final rankingProvider =
+        Provider.of<RankingProvider>(context, listen: false);
     if (!rankingProvider.isInitialLoadDone) {
       rankingProvider.loadRankingData();
     }
-    final logProvider = Provider.of<LogProvider>(context,listen: false);
-    if(!logProvider.isDataLoaded){
+    final logProvider = Provider.of<LogProvider>(context, listen: false);
+    if (!logProvider.isDataLoaded) {
       logProvider.fetchAndCacheRecords();
     }
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
