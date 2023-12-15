@@ -16,6 +16,27 @@ iRun은 Flutter로 개발된 러닝 기록 애플리케이션으로 Android와 W
 7. TTS 기능 제공
 
 ---
+## 상세 화면
+1. 로그인 화면
+![login](https://github.com/OSP-ARAM/iRun/assets/138470360/62d1de09-d20c-49e9-bea3-f5b93b3c8915)
+2. 메인 화면
+![main](https://github.com/OSP-ARAM/iRun/assets/138470360/3cfe31c1-5a7d-43e1-9963-186b68c91435)
+3. 러닝 기록 화면
+![runRecord](https://github.com/OSP-ARAM/iRun/assets/138470360/8072fe0c-fc72-4351-a1b2-8b975c7437e4)
+4. 러닝 기록 중지 화면
+![runStop](https://github.com/OSP-ARAM/iRun/assets/138470360/56a0f45a-2a02-4ab1-8162-3b8c03f86e15)
+5. 러닝 통계 리스트 화면
+![log](https://github.com/OSP-ARAM/iRun/assets/138470360/0568ad00-5cb0-4e1e-9ceb-f5c735982a73)
+6. 러닝 통계 상세 화면
+![logDetail](https://github.com/OSP-ARAM/iRun/assets/138470360/bd7e2dac-723a-404b-87a1-f94097ecb15f)
+7. 음악 화면
+![music](https://github.com/OSP-ARAM/iRun/assets/138470360/9c85956a-bb2e-4425-9d8a-18ff97c11086)
+8. 랭킹 화면
+![ranking](https://github.com/OSP-ARAM/iRun/assets/138470360/49c6b2e3-9de5-4bbf-9cce-9a6690737c70)
+9. 업적 화면
+![achievement](https://github.com/OSP-ARAM/iRun/assets/138470360/fce8d827-a53b-4983-826e-595884be7910)
+
+---
 
 ## Getting Started
 
