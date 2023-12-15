@@ -32,7 +32,7 @@ iRun은 Flutter로 개발된 러닝 기록 애플리케이션으로 Android와 W
 아래 링크를 사용해서 이 레포지토리를 다운로드하거나 복제합니다.:
 
 ```
-https://github.com/pr4aveen/jogzilla.git](https://github.com/OSP-ARAM/iRun.git
+https://github.com/OSP-ARAM/iRun.git
 ```
 
 **Step 2:**
