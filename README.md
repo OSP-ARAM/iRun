@@ -43,7 +43,7 @@ https://github.com/OSP-ARAM/iRun.git
 flutter pub get 
 ```
 
-콘솔에서 다음 명령을 실행하고, Firebase의 로그인해 당신의 프로젝트와 연결해주어야 합니다.
+콘솔에서 다음 명령을 실행하고, Firebase에 로그인해 당신의 프로젝트와 연결해주어야 합니다.
 
 ```
 firebase login
