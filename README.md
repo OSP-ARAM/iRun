@@ -2,7 +2,7 @@
 
 iRun은 Flutter로 개발된 러닝 기록 애플리케이션으로 Android와 Web 환경에서 동작시킬 수 있습니다.
 
-동영상 데모를 보려면 여기(https://youtu.be/pWvLRgoUIC8?si=chBp9lhsnPXh4MNj)를 클릭하세요.
+동영상 데모를 보려면 [여기](https://youtu.be/pWvLRgoUIC8?si=chBp9lhsnPXh4MNj)를 클릭하세요.
 
 
 ---
