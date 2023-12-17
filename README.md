@@ -46,7 +46,7 @@ iRun은 Flutter로 개발된 러닝 기록 애플리케이션으로 Android와 W
 
   * 로컬 환경에 최신 버전의 Flutter 및 Dart가 설치되어 있어야 합니다.
   * 로컬 환경에서 최신 버전의 Firebase가 설치되어 있고, 유효한 Firebase 프로젝트가 있어야 합니다.
-  * 유효한 API 키가 있는 구글 계정 및 ? 계정이 있어야 합니다.
+  * 유효한 API 키가 있는 구글 계정 및 OpenWeather 계정이 있어야 합니다.
 
 **Step 1:**
 
@@ -72,11 +72,23 @@ firebase login
 
 **Step 3:**
 
-각 파일에서 유효한 API 키를 추가해줍니다.
+각 파일에서 유효한 API 키와 keystore 파일을 추가해줍니다.
 
+- iRun/lib/firebase_options.dart : firebase 초기 설정을 통해 자동 생성
+- iRun/android/app/keystore 에 keystore 파일 추가
+- iRun/lib/login/login_api.dart
 ```dart
-
+clientId: YOUR_CLIENT_ID.apps.googleusercontent.com
 ```
+- iRun/lib/home/home_page.dart
+```dart
+final _weatherService = WeatherService('YOUR_API_KEY");
+```
+- iRun/web/index.html
+```html
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+```
+
 **Step 4:**
 
 콘솔에서 아래 명령어를 실행하고 app을 실행합니다.
