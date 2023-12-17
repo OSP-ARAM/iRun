@@ -29,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool showProperty1Home = false;
-  final _weatherService = WeatherService('93c0bc89694229c14ef4d76fe99b5c52');
+  final _weatherService = WeatherService('YOUR_API_KEY');
   Weather? _weather;
 
   StreamSubscription<Position>? _positionStreamSubscription;
